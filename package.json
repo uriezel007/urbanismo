@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "node scripts/build-offline.mjs",
-    "test": "node tests/legacy.test.cjs && node tests/engine.test.ts && node tests/calibration.test.ts && node tests/ui-smoke.cjs",
+    "test": "node tests/legacy.test.cjs && node tests/engine.test.ts && node tests/calibration.test.ts && node tests/obj.test.ts && node tests/ui-smoke.cjs",
     "dev:webgl": "vite --config web/react/vite.config.ts",
     "build:webgl": "tsc -p web/react/tsconfig.json && vite build --config web/react/vite.config.ts"
   },
