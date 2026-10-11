@@ -444,5 +444,10 @@ if(window.PHEI3D){
  phei3dOverview=window.PHEI3D.mount($('overviewModelMount'),link3d,true);
  phei3dFull=window.PHEI3D.mount($('model3dMount'),link3d,false);
 }else notify('No se pudo cargar el visor 3D; utiliza el plano 2D.');
+// Puente de lectura para módulos externos: mantiene los datos clínicos/espaciales sin mutarlos.
+window.PHEI_RUNTIME={model3d:phei3dFull,modelOverview:phei3dOverview,getData:()=>data,getSelected:()=>selected};
 })();
-</script></body></html>
+</script>
+<script src="./simulacion.js"></script>
+<script src="./exportar_obj.js"></script>
+</body></html>

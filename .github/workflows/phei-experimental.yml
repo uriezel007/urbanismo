@@ -1,0 +1,25 @@
+name: PHEI experimental checks
+on:
+  push:
+    branches:
+      - 'codex/phei-simulacion-v07'
+    paths:
+      - 'phei/**'
+      - '.github/workflows/phei-experimental.yml'
+  pull_request:
+    paths:
+      - 'phei/**'
+      - '.github/workflows/phei-experimental.yml'
+  workflow_dispatch:
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: PHEI deterministic simulation tests
+        run: node --test phei/tests/simulacion.test.cjs
