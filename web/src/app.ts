@@ -38,6 +38,20 @@ el('play').onclick=()=>{running=!running;last=0;el('play').textContent=running?'
 el('roomCapacity').onchange=()=>{const input=el<HTMLInputElement>('roomCapacity'),v=Number(input.value);if(!Number.isInteger(v)||v<1||v>200){announce('Capacidad entre 1 y 200 personas');renderRoom();return}archiveRun();workspace.scene.rooms.find(r=>r.id===selection)!.capacity=v;reset();announce('Capacidad hipotética actualizada. Corrida reiniciada.')};
 el<HTMLFormElement>('scenarioForm').onsubmit=e=>{e.preventDefault();const f=new FormData(el<HTMLFormElement>('scenarioForm'));const parameters=Object.fromEntries([...f.entries()].map(([k,v])=>[k,Number(v)])) as unknown as Parameters;try{createSimulation(workspace.scene,parameters);archiveRun();workspace.parameters=parameters;reset();announce('Nuevo escenario preparado')}catch(error){announce(String(error))}};
 el('exportBlender').onclick=downloadBlender;
+const openWebgl=el<HTMLButtonElement>('openWebgl');
+if(location.protocol==='http:'||location.protocol==='https:'){
+  // Sólo anunciar WebGL cuando el bundle está realmente servido en el mismo origen.
+  fetch('/webgl/',{method:'HEAD',cache:'no-store'}).then(r=>{openWebgl.hidden=!r.ok}).catch(()=>openWebgl.hidden=true);
+}
+openWebgl.onclick=()=>{
+  if(!save())return; // Historial protegido antes de abandonar la sesión de trabajo.
+  try{
+    const handoff={schema:'phei-webgl-scene-1',savedAt:Date.now(),projectName:workspace.name,
+      scene:structuredClone(workspace.scene),parameters:{...workspace.parameters}};
+    sessionStorage.setItem('PHEI_WEBGL_SCENE_V1',JSON.stringify(handoff));
+    window.location.assign('/webgl/');
+  }catch(error){announce('No se pudo abrir el visor 3D: '+String(error))}
+};
 el('exportRun').onclick=()=>{const r={...result(simulation),id:runId};archiveRun();download('PHEI_corrida_simulada.json',r);workspace.evidence.push({id:uid(),kind:'simulated',label:'Espera acumulada de corrida exportada',value:r.totalWait,unit:'persona·s',source:r.engine+' · semilla '+r.seed+' · t='+r.time+' s',recorded_at:new Date().toISOString(),limitations:r.limitations.join(' '),run_id:runId});renderEvidence()};
 function renderEvidence(){const body=el('evidenceTable');body.replaceChildren();for(const evidence of workspace.evidence){const row=document.createElement('tr');cell(row,categories[evidence.kind]);cell(row,evidence.label);cell(row,String(evidence.value)+' '+evidence.unit);cell(row,evidence.source);cell(row,evidence.limitations);body.append(row)}if(!workspace.evidence.length){const row=document.createElement('tr');cell(row,'Sin registros. Añade evidencia o exporta una corrida para registrar su resultado simulado.');body.append(row)}}
 el<HTMLFormElement>('evidenceForm').onsubmit=e=>{e.preventDefault();const f=new FormData(el<HTMLFormElement>('evidenceForm'));workspace.evidence.push({id:uid(),kind:String(f.get('kind')) as RecordItem['kind'],label:String(f.get('label')),value:String(f.get('value')),unit:String(f.get('unit')),source:String(f.get('source')),recorded_at:new Date().toISOString(),limitations:String(f.get('limitations'))});renderEvidence();el<HTMLFormElement>('evidenceForm').reset();announce('Registro añadido. Guarda una versión para conservarlo.')};

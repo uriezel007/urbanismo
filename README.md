@@ -63,4 +63,4 @@ El build autónomo elimina tipos mediante Node; **no equivale a una comprobació
 
 Lee [VALIDACION.md](docs/VALIDACION.md) para resultados, pruebas pendientes y restricciones. No se ha recuperado 0.6: no apareció en ramas, etiquetas, releases, PR ni historial disponible, y el usuario no conoce su ubicación. Se preservó 0.5 y la evolución es aditiva.
 
-[Auditoría](docs/AUDITORIA.md) · [Arquitectura y metodología](docs/ARQUITECTURA.md) · [Despliegue](docs/DESPLIEGUE.md) · [Cambios](CHANGELOG.md).
+[Integración WebGL y móvil](docs/INTEGRACION_WEBGL.md) · [Auditoría](docs/AUDITORIA.md) · [Arquitectura y metodología](docs/ARQUITECTURA.md) · [Despliegue](docs/DESPLIEGUE.md) · [Cambios](CHANGELOG.md).

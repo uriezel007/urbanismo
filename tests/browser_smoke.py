@@ -23,7 +23,7 @@ with tempfile.TemporaryDirectory() as temp:
             except Exception:time.sleep(.1)
         else:raise RuntimeError('Servidor no disponible')
         with sync_playwright() as p:
-            browser=p.chromium.launch()
+            browser=p.chromium.launch(args=['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'])
             page=browser.new_page(viewport={'width':1440,'height':1000},device_scale_factor=1)
             errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
             page.goto('http://127.0.0.1:8765/');page.wait_for_selector('#roomButtons button')
@@ -57,6 +57,14 @@ with tempfile.TemporaryDirectory() as temp:
             out=ROOT/'artifacts';out.mkdir(exist_ok=True);page.screenshot(path=str(out/'phei-desktop.png'),full_page=True)
             page.set_viewport_size({'width':390,'height':844});page.screenshot(path=str(out/'phei-mobile.png'),full_page=True)
             assert page.evaluate('() => document.documentElement.scrollWidth <= innerWidth+1')
+            # Handoff a React/WebGL en el mismo origen: guarda revisión, pasa escena hipotética y vuelve.
+            expect(page.locator('#openWebgl')).to_be_visible()
+            page.locator('#openWebgl').click()
+            expect(page).to_have_url('http://127.0.0.1:8765/webgl/')
+            expect(page.get_by_role('heading',name='El espacio a escala humana.')).to_be_visible()
+            expect(page.get_by_text('De 24 personas')).to_be_visible()
+            page.get_by_role('link',name='Volver al estudio y evaluaciones').click()
+            expect(page).to_have_url('http://127.0.0.1:8765/')
             page.goto('http://127.0.0.1:8765/phei/');expect(page.locator('#model3dMount canvas')).to_have_count(1)
             assert page.locator('#kZones').inner_text()=='7'
             assert page.locator('#kStress').inner_text()=='—'
