@@ -75,7 +75,7 @@ def create_app(database_url=None, origin=None, production=None):
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
-        # Legacy needs inline scripts/styles; modern app gets stricter policy.
+        # Inline scripts support the self-contained delivery; eval stays forbidden.
         script = "'self' 'unsafe-inline'"  # Packaged offline viewer and legacy use inline scripts.
         response.headers['Content-Security-Policy'] = f"default-src 'self'; script-src {script}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; form-action 'self'"
         if request.url.path.startswith('/api'):
