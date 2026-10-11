@@ -23,7 +23,7 @@ with tempfile.TemporaryDirectory() as temp:
             except Exception:time.sleep(.1)
         else:raise RuntimeError('Servidor no disponible')
         with sync_playwright() as p:
-            browser=p.chromium.launch()
+            browser=p.chromium.launch(args=['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'])
             page=browser.new_page(viewport={'width':1440,'height':1000},device_scale_factor=1)
             errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
             page.goto('http://127.0.0.1:8765/');page.wait_for_selector('#roomButtons button')
