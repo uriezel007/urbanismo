@@ -8,7 +8,7 @@ Distribuir `dist/` completo o el ZIP de entrega. `index.html` funciona sin red; 
 
 Python 3.12, dependencias de `api/requirements.txt`. Crear usuario con `python -m api.manage create-user USUARIO`; iniciar `python -m uvicorn api.main:app --host 127.0.0.1 --port 8000`. Usar exactamente el origen `http://127.0.0.1:8000`, o configurar `APP_ORIGIN` con el origen deseado. La API restringe Host y Origin para evitar accesos cruzados y CSRF.
 
-## Producción propuesta (sin despliegue verificado)
+## Producción propuesta (contenedores verificados; sin URL pública)
 
 1. Preparar host Docker, dominio y proxy HTTPS. Revisar versiones, imágenes y dependencias; fijar digests aprobados y lockfiles antes de promoción.
 2. Copiar `.env.example` a `.env` fuera de control de versiones. Crear contraseñas independientes de administrador PostgreSQL y rol `phei_app`. Configurar URL con contraseña codificada y `APP_ORIGIN=https://dominio`.
@@ -27,4 +27,4 @@ El script de inicialización crea esquema propio y rol sin superusuario para la 
 - Navegador: exportar proyecto y, en el clásico, historial completo. Revisiones locales no son un respaldo remoto.
 - Rollback de código: volver al commit anterior manteniendo volumen y copia de la base. No aplicar migraciones destructivas para volver atrás.
 
-No se puede marcar esta estrategia como «despliegue verificable completado» hasta registrar URL, SHA desplegado, resultado de health, persistencia tras reinicio y ejecución de pruebas reales. En este entorno no se dispuso de esa verificación.
+No se puede marcar esta estrategia como «despliegue verificable completado» hasta registrar URL, SHA desplegado, resultado de health, persistencia tras reinicio y ejecución de pruebas reales. GitHub Actions sí verificó un despliegue efímero de contenedores, health y persistencia tras reinicio. Falta publicar en un dominio con HTTPS y registrar su comprobación pública.

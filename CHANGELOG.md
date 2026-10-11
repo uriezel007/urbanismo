@@ -11,8 +11,9 @@
 - Simulación reproducible de ocupación, rutas, capacidad hipotética, permanencia y espera.
 - Proyectos locales con revisiones, importación como copia, exportación y evidencia de cuatro categorías.
 - FastAPI, sesiones, permisos por propietario, CSRF, historial, auditoría y adaptador PostgreSQL.
-- Visor React/Three/R3F complementario preparado, pendiente de compilación y QA en ejecutor con red.
-- Pruebas automatizadas, integración de navegador/PostgreSQL preparada, CI y configuración Docker/proxy.
+- Visor React/Three/R3F complementario compilado y probado en Chromium/WebGL en CI.
+- Pruebas automatizadas e integración de Chromium, PostgreSQL y Docker con persistencia tras reinicio verificadas en CI.
+- Lockfile de npm recuperado; Vite actualizado a 8.3.4, auditoría completa de npm sin alertas en la ejecución registrada.
 - RAG explícitamente inactivo hasta contar con fuentes originales verificadas y evaluación.
 
 ## Base preservada

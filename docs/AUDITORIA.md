@@ -27,7 +27,7 @@ El árbol contenía `.gitkeep` y `phei/index.html` (97.238 bytes). No había AGE
 
 ## Dependencias y límites de seguridad
 
-La aplicación clásica y el build autónomo no usan paquetes externos de navegador. La versión React/WebGL añade React, Three, R3F, Drei, Vite y TypeScript con versiones directas fijadas. El backend añade FastAPI, uvicorn y psycopg. No se completó una consulta de vulnerabilidades ni un lockfile transitivo en el entorno aislado; no se puede afirmar «sin vulnerabilidades».
+La aplicación clásica y el build autónomo no usan paquetes externos de navegador. La versión React/WebGL añade React, Three, R3F, Drei, Vite y TypeScript con versiones directas fijadas. El backend añade FastAPI, uvicorn y psycopg. La instalación y auditoría se trasladaron a GitHub Actions. Se corrigió la alerta inicial de Vite actualizando a 8.3.4; `npm audit --audit-level=high` informó 0 vulnerabilidades el 11/10/2026. Se recuperó el lockfile transitivo. Esto es el resultado de esa consulta, no garantía de ausencia de vulnerabilidades futuras o no publicadas.
 
 La API aplica cookies Secure en producción, SameSite=Strict, HttpOnly, expiración de 8 horas, CSRF, host/origin permitidos, tamaño máximo de cuerpo y PBKDF2-SHA256 con sal aleatoria y 600.000 iteraciones. No almacena tokens de sesión en texto plano en la base de datos. No tiene registro público; alta mediante CLI.
 

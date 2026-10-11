@@ -50,8 +50,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: npm install --ignore-scripts
-      - run: node -e "console.log('PHEI_LOCK_BEGIN'+JSON.stringify(require('./package-lock.json'))+'PHEI_LOCK_END')"
+      - run: npm ci --ignore-scripts
       - run: npm run build:webgl
       - run: npm audit --audit-level=high
       - uses: actions/setup-python@v5

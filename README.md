@@ -27,7 +27,7 @@ Abre `http://127.0.0.1:8000`. Desarrollo utiliza SQLite en `/tmp/phei-dev.sqlite
 - Calibración de planos por dos puntos, sin deformar los ejes, con referencia de longitud de 1,75 m. No genera geometría navegable automáticamente.
 - API FastAPI: cuentas, cookies de sesión, CSRF, control de origen/host, proyectos por propietario, revisiones y auditoría transaccionales, conflictos de edición.
 - PostgreSQL mediante psycopg; SQLite limitado a desarrollo/pruebas.
-- Visor complementario React/React Three Fiber/Three.js en `web/react/`. Requiere dependencias y verificación separada; no sustituye aún toda la interfaz autónoma.
+- Visor complementario React/React Three Fiber/Three.js en `web/react/`. Compilado y probado en Chromium mediante CI; no sustituye aún toda la interfaz autónoma.
 - Recuperación exacta de 0.5 en `archive/`, auditoría, pruebas, CI y configuración de despliegue.
 
 ## Construir y probar
@@ -52,12 +52,12 @@ python -m tests.browser_smoke
 Visor React/WebGL complementario:
 
 ```sh
-npm install --ignore-scripts
+npm ci --ignore-scripts
 npm run dev:webgl
 npm run build:webgl
 ```
 
-El build autónomo elimina tipos mediante Node; **no equivale a una comprobación estática de TypeScript**. El build WebGL ejecuta `tsc`. No se produjo un lockfile de npm porque el entorno de entrega no pudo acceder al registro: antes de distribuir WebGL en producción, generar/revisar el lockfile, ejecutar auditoría y utilizar `npm ci`.
+El build autónomo elimina tipos mediante Node; **no equivale a una comprobación estática de TypeScript**. El build WebGL ejecuta `tsc`. El lockfile de npm se generó en GitHub Actions, se recuperó y se incluye en la entrega. La compilación React y la auditoría completa de npm pasaron allí. Usa `npm ci` para conservar esas resoluciones.
 
 ## Estado verificable
 
