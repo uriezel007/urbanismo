@@ -49,14 +49,14 @@ function initialize(count,width,scenario,seed){
 function advance(m,step){
  if(m.time>=horizon)return;
  const occupied=m.agents.filter(a=>!a.finished && a.x>405 && a.x<610).length;
- const cap=Math.max(3,Math.round(m.width*3.2));
+ const cap=Math.max(3,Math.round(m.width*9));
  const crowd=Math.max(0,(occupied-cap)/cap);
  m.peak=Math.max(m.peak,occupied);
  m.meanLoad+=crowd;m.frames++;
  for(const a of m.agents){
   if(a.finished)continue;
   const inBottleneck=a.x>395 && a.x<620;
-  const slow=inBottleneck?1/(1+1.75*crowd):1;
+  const slow=inBottleneck?1/(1+.65*crowd):1;
   const pace=Math.max(2,a.pace*slow);
   a.x+=a.dir*pace*step;
   a.load=inBottleneck?crowd:0;
