@@ -3,6 +3,7 @@ import type {Scene,Parameters,Point} from './model.ts';
 import {createSimulation,step,metrics,result} from './engine.ts';
 import {createViewer,PERSON_HEIGHT} from './viewer.ts';
 import {calibrate} from './calibration.ts';
+import {exportBlenderOBJ} from './obj.ts';
 import type {Calibration} from './calibration.ts';
 interface RecordItem {id:string;kind:'measured'|'professional_observation'|'hypothetical'|'simulated';label:string;value:string|number;unit:string;source:string;recorded_at:string;limitations:string;run_id?:string}
 interface Workspace {schema:'phei-twin-1';id:string;name:string;scene:Scene;parameters:Parameters;evidence:RecordItem[];runs:(ReturnType<typeof result>&{id:string})[];plan:string|null;calibration:Calibration|null;legacyArchive:string|null;updated:string}
@@ -14,6 +15,7 @@ let workspace=empty(),simulation=createSimulation(workspace.scene,workspace.para
 const viewer=createViewer(el<HTMLCanvasElement>('sceneCanvas'),id=>{selection=id;renderRoom();render()});
 function announce(message:string){const box=el('toast');box.textContent=message;box.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>box.hidden=true,7000)}
 function download(name:string,value:unknown){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+function downloadBlender(){try{const text=exportBlenderOBJ(workspace.scene);const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='PHEI_modelo_hipotetico_metros.obj';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);announce('OBJ exportado. Escena hipotética: verifica escala y dimensiones antes de aplicarla.')}catch(error){announce('No se exportó OBJ: '+String(error))}}
 function button(text:string,action:()=>void){const b=document.createElement('button');b.type='button';b.textContent=text;b.onclick=action;return b}
 function cell(row:HTMLTableRowElement,text:string){const td=document.createElement('td');td.textContent=text;row.append(td)}
 function render(){
@@ -35,6 +37,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.onclick=
 el('play').onclick=()=>{running=!running;last=0;el('play').textContent=running?'Ⅱ Pausar':'▶ Continuar'};el('reset').onclick=reset;
 el('roomCapacity').onchange=()=>{const input=el<HTMLInputElement>('roomCapacity'),v=Number(input.value);if(!Number.isInteger(v)||v<1||v>200){announce('Capacidad entre 1 y 200 personas');renderRoom();return}archiveRun();workspace.scene.rooms.find(r=>r.id===selection)!.capacity=v;reset();announce('Capacidad hipotética actualizada. Corrida reiniciada.')};
 el<HTMLFormElement>('scenarioForm').onsubmit=e=>{e.preventDefault();const f=new FormData(el<HTMLFormElement>('scenarioForm'));const parameters=Object.fromEntries([...f.entries()].map(([k,v])=>[k,Number(v)])) as unknown as Parameters;try{createSimulation(workspace.scene,parameters);archiveRun();workspace.parameters=parameters;reset();announce('Nuevo escenario preparado')}catch(error){announce(String(error))}};
+el('exportBlender').onclick=downloadBlender;
 el('exportRun').onclick=()=>{const r={...result(simulation),id:runId};archiveRun();download('PHEI_corrida_simulada.json',r);workspace.evidence.push({id:uid(),kind:'simulated',label:'Espera acumulada de corrida exportada',value:r.totalWait,unit:'persona·s',source:r.engine+' · semilla '+r.seed+' · t='+r.time+' s',recorded_at:new Date().toISOString(),limitations:r.limitations.join(' '),run_id:runId});renderEvidence()};
 function renderEvidence(){const body=el('evidenceTable');body.replaceChildren();for(const evidence of workspace.evidence){const row=document.createElement('tr');cell(row,categories[evidence.kind]);cell(row,evidence.label);cell(row,String(evidence.value)+' '+evidence.unit);cell(row,evidence.source);cell(row,evidence.limitations);body.append(row)}if(!workspace.evidence.length){const row=document.createElement('tr');cell(row,'Sin registros. Añade evidencia o exporta una corrida para registrar su resultado simulado.');body.append(row)}}
 el<HTMLFormElement>('evidenceForm').onsubmit=e=>{e.preventDefault();const f=new FormData(el<HTMLFormElement>('evidenceForm'));workspace.evidence.push({id:uid(),kind:String(f.get('kind')) as RecordItem['kind'],label:String(f.get('label')),value:String(f.get('value')),unit:String(f.get('unit')),source:String(f.get('source')),recorded_at:new Date().toISOString(),limitations:String(f.get('limitations'))});renderEvidence();el<HTMLFormElement>('evidenceForm').reset();announce('Registro añadido. Guarda una versión para conservarlo.')};
