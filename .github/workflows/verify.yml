@@ -18,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: ephemeral-ci-only
           POSTGRES_DB: phei_test
         ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+        options: --health-cmd "pg_isready -U phei_test -d phei_test" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,8 +52,10 @@ jobs:
           node-version: '24'
       - run: npm install --ignore-scripts
       - run: npm run build:webgl
-      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --audit-level=high
       - uses: actions/upload-artifact@v4
         with:
           name: phei-webgl-preview
-          path: dist-webgl/
+          path: |
+            dist-webgl/
+            package-lock.json

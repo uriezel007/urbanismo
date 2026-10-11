@@ -3,13 +3,27 @@
   "version": "1.0.0-preview.1",
   "private": true,
   "type": "module",
-  "engines": {"node": ">=24.0.0"},
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "build": "node scripts/build-offline.mjs",
     "test": "node tests/legacy.test.cjs && node tests/engine.test.ts && node tests/calibration.test.ts && node tests/ui-smoke.cjs",
     "dev:webgl": "vite --config web/react/vite.config.ts",
     "build:webgl": "tsc -p web/react/tsconfig.json && vite build --config web/react/vite.config.ts"
   },
-  "dependencies": {"react":"19.1.1","react-dom":"19.1.1","three":"0.180.0","@react-three/fiber":"9.3.0","@react-three/drei":"10.7.6"},
-  "devDependencies": {"typescript":"5.9.2","vite":"7.1.7","@types/react":"19.1.16","@types/react-dom":"19.1.9","@types/three":"0.180.0"}
+  "dependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "three": "0.180.0",
+    "@react-three/fiber": "9.3.0",
+    "@react-three/drei": "10.7.6"
+  },
+  "devDependencies": {
+    "typescript": "5.9.2",
+    "vite": "8.3.4",
+    "@types/react": "19.1.16",
+    "@types/react-dom": "19.1.9",
+    "@types/three": "0.180.0"
+  }
 }
