@@ -206,6 +206,9 @@ def create_app(database_url=None, origin=None, production=None):
 
     root = Path(__file__).resolve().parents[1]
     app.mount('/phei', StaticFiles(directory=root/'phei', html=True), name='legacy')
+    # El visor React/WebGL complementario usa la misma API y el mismo origen.
+    if (root/'dist-webgl').is_dir():
+        app.mount('/webgl', StaticFiles(directory=root/'dist-webgl', html=True), name='webgl')
     if (root/'dist').exists():
         app.mount('/', StaticFiles(directory=root/'dist', html=True), name='web')
     else:
