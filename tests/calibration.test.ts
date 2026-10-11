@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {calibrate,scaledArea} from '../web/src/calibration.ts';import {PERSON_HEIGHT,DOOR_HEIGHT,WALL_HEIGHT} from '../web/src/viewer.ts';
+test('persona 1.75 metros, puerta 2.10 y pared 2.80 comparten unidad',()=>{assert.equal(PERSON_HEIGHT,1.75);assert.ok(PERSON_HEIGHT<DOOR_HEIGHT&&DOOR_HEIGHT<WALL_HEIGHT)});
+test('500 px para 5 m produce figura 175px y área 25m²',()=>{const c=calibrate([0,0],[500,0],5,1000,1000);assert.equal(c.metersPerPixel,.01);assert.equal(PERSON_HEIGHT/c.metersPerPixel,175);assert.equal(scaledArea([[0,0],[500,0],[500,500],[0,500]],c),25)});
+test('escala isotrópica, sin asumir unidades de plano no calibrado',()=>{const c=calibrate([0,0],[300,400],10,1000,1000);assert.equal(c.metersPerPixel,.02);assert.throws(()=>calibrate([0,0],[0,0],1,100,100));assert.throws(()=>calibrate([0,0],[50,50],0,100,100));assert.throws(()=>calibrate([-1,0],[50,50],1,100,100))});
