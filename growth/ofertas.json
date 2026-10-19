@@ -1,0 +1,40 @@
+{
+  "schema": "preser.offers.v1",
+  "updated": "2026-10-19",
+  "currency": "PEN",
+  "note": "Precios hipotéticos. Requieren validación comercial; no son ventas.",
+  "offers": [
+    {
+      "id": "phei-piloto",
+      "status": "validando",
+      "title": "PHEI Diagnóstico Exploratorio",
+      "price": 2900,
+      "kind": "service",
+      "fulfillment": "manual"
+    },
+    {
+      "id": "phei-institucional",
+      "status": "idea",
+      "title": "PHEI Institucional",
+      "price_from": 9500,
+      "kind": "service",
+      "fulfillment": "manual"
+    },
+    {
+      "id": "kit-espacios",
+      "status": "idea",
+      "title": "Kit educativo de observación de espacios",
+      "price": 59,
+      "kind": "digital",
+      "fulfillment": "not_ready"
+    },
+    {
+      "id": "taller",
+      "status": "idea",
+      "title": "Taller remoto",
+      "price": 249,
+      "kind": "workshop",
+      "fulfillment": "not_ready"
+    }
+  ]
+}
