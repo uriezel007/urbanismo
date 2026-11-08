@@ -76,3 +76,24 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m tests.deployment_smoke
+
+  delivery:
+    needs: [core, webgl, deployment]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/verified
+      - run: python scripts/package-delivery.py --artifacts "${{ runner.temp }}/verified" --output "${{ runner.temp }}/PHEI"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PHEI-Digital-Twin-1.0-entrega
+          path: ${{ runner.temp }}/PHEI/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90

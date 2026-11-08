@@ -1,0 +1,44 @@
+PHEI DIGITAL TWIN — INICIO DESDE CERO
+
+1. Extrae todo este ZIP.
+2. Abre dist/index.html en Chrome, Edge o Firefox.
+3. Pulsa Iniciar para simular. Pausar detiene la simulación.
+4. Cambia cámaras y capas; selecciona ambientes para ver ocupación.
+5. Guarda versiones y exporta tu proyecto JSON como respaldo.
+
+La persona mide 1,75 m (175 cm); puertas 2,10 m; paredes 2,80 m.
+El edificio demo es hipotético. Calibra tus planos con una distancia real.
+Exportar Blender genera un OBJ métrico.
+
+El paquete incluye:
+dist/: aplicación autónoma y PHEI clásico.
+dist-webgl/: visor React/Three compilado.
+web/, api/, tests/: fuentes y pruebas.
+archive/: original 0.5 preservado.
+docs/: auditoría, arquitectura y despliegue.
+artifacts/: capturas de navegador.
+ENTREGA.json: commit y ejecución CI del paquete.
+SHA256SUMS.txt: integridad de archivos.
+
+Para cuentas y sincronización local (Python 3.12), abre una terminal aquí:
+python -m pip install -r api/requirements.txt
+python -m api.manage create-user TU_USUARIO
+python -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+Después abre http://127.0.0.1:8000
+No hay contraseñas predeterminadas. SQLite es solo para desarrollo.
+Para PostgreSQL y HTTPS sigue docs/DESPLIEGUE.md.
+
+Para el visor React compilado:
+python -m http.server 8080 --bind 127.0.0.1 --directory dist-webgl
+Abre http://127.0.0.1:8080 (requiere WebGL).
+
+Antes de cambiar de navegador u origen, exporta los datos.
+Nunca ejecutes docker compose down -v sobre una instalación con datos.
+
+ALCANCE
+Preview exploratoria; no equivale a un producto científicamente validado.
+No hay un servidor público configurado.
+No se encontró 0.6; se conserva 0.5.
+React es complementario; el motor no resuelve colisiones.
+RAG sigue inactivo hasta disponer de fuentes verificadas.
+No representa emociones reales, resultados clínicos ni evacuación oficial.
