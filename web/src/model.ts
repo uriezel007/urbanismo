@@ -4,7 +4,7 @@ export interface Room { id:string; name:string; x:number; z:number; width:number
 export interface Door { id:string; a:string; b:string; at:Point; width:number }
 export interface Furniture { id:string; x:number; z:number; width:number; depth:number }
 export interface Scene { rooms:Room[]; doors:Door[]; furniture:Furniture[]; entry:string; unit:'m'; provenance:'hypothetical' }
-export interface Parameters { population:number; seed:number; speed:number; arrivalInterval:number; dwell:number; orientationDelay:number; environmentalMultiplier:number }
+export interface Parameters { collisionAvoidance?:number; population:number; seed:number; speed:number; arrivalInterval:number; dwell:number; orientationDelay:number; environmentalMultiplier:number }
 export const defaults:Parameters={population:24,seed:42,speed:1.2,arrivalInterval:1.5,dwell:12,orientationDelay:1,environmentalMultiplier:1};
 export const demo:Scene={unit:'m',provenance:'hypothetical',entry:'hall',rooms:[
  {id:'hall',name:'Circulación',x:0,z:0,width:18,depth:3,capacity:30},

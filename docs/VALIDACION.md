@@ -44,3 +44,11 @@ La primera prueba Chromium falló porque su espera utilizaba evaluación de text
 - Los agentes pueden solaparse; el modelo no resuelve colisiones interpersonales ni evitación automática del mobiliario. La calibración raster no genera topología de navegación.
 
 Por ello se entrega como **1.0 preview**, no como garantía universal de funcionamiento «al 100 %» o producto certificado.
+
+## Ampliación del 8 de noviembre de 2026
+
+El paquete único se comprobó en https://github.com/uriezel007/urbanismo/actions/runs/42482504594 (commit f6567208b88547482120f389f6b8b38e70e96f07): core, webgl, deployment y delivery aprobados. Incluye ambos visores, fuentes, capturas, LEEME, identificación de commit y manifiesto SHA-256; verifica el hash del original 0.5.
+
+Se incorpora después un modo físico **experimental**: discos hipotéticos de radio 0,22 m, comprobación de trayectorias contra agentes/mobiliario/paredes y desvío local. Tres pruebas adicionales comprueban separación, obstáculos y reproducibilidad. El modo por defecto sigue siendo el modelo de portales. Los bloqueos no se resuelven globalmente; no se garantiza que todos los agentes completen una corrida física. No se ha calibrado el radio con población real ni se modelan ayudas técnicas o variedad antropométrica.
+
+La referencia de Brusilovsky de 2022 tiene metadatos editoriales comprobados; véase FUENTES.md. Esto no equivale a validar PHEI ni a habilitar RAG.

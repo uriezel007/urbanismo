@@ -6,9 +6,9 @@
 <main><div class="titlebar"><div><span class="eyebrow">OBSERVAR · EXPLORAR · COMPARAR</span><h1 id="pageTitle">El espacio, a escala humana.</h1><p id="pageDescription">Explora la ocupación y los recorridos sobre un modelo proporcional en metros.</p></div><div class="topactions"><button id="saveProject">Guardar versión</button><button class="primary" id="exportProject">Exportar proyecto ↓</button></div></div>
 <div class="context"><span class="badge">MODELO HIPOTÉTICO</span><span>Referencia humana <b>1,75 m</b></span><span>Unidades <b>metros</b></span><span>Resultados <b>simulados</b></span></div>
 <section data-panel="spatial"><div class="metrics"><article><span>Personas activas</span><strong id="activePeople">0</strong><small>Ocupación simulada actual</small></article><article><span>Espera acumulada</span><strong id="waitMetric">0 <em>s</em></strong><small>Suma de tiempos de espera</small></article><article><span>Recorrido total</span><strong id="distanceMetric">0 <em>m</em></strong><small>Distancia de todos los agentes</small></article><article><span>Finalizaron recorrido</span><strong id="completedMetric">0 <em>/ 24</em></strong><small>Retorno al ambiente de entrada</small></article></div>
-<div class="studio"><section class="viewport"><div class="viewporthead"><div><span class="live-dot"></span> CENTRO DE ATENCIÓN <small>PLANTA 01 · 7 AMBIENTES</small></div><div class="segmented"><button data-camera="perspective" class="active">3D</button><button data-camera="plan">Planta</button></div></div><div class="canvaswrap"><canvas id="sceneCanvas" aria-label="Modelo espacial tridimensional en metros. Usa la lista de ambientes para selección accesible."></canvas><div class="scale">1 m × 1 m <span>CUADRÍCULA MÉTRICA</span></div><div class="viewhint">Arrastra para girar · Rueda para acercar · Selecciona un ambiente</div></div><div class="playbar"><button class="primary" id="play">▶ Iniciar</button><button id="reset">↺ Reiniciar</button><span id="clock">00:00,0</span><label>Velocidad <select id="playback"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label><button id="exportRun">Exportar corrida ↓</button></div><div id="roomButtons" class="roomlist" aria-label="Seleccionar ambiente"></div></section>
+<div class="studio"><section class="viewport"><div class="viewporthead"><div><span class="live-dot"></span> CENTRO DE ATENCIÓN <small>PLANTA 01 · 7 AMBIENTES</small></div><div class="segmented"><button data-camera="perspective" class="active">3D</button><button data-camera="plan">Planta</button></div></div><div class="canvaswrap"><canvas id="sceneCanvas" aria-label="Modelo espacial tridimensional en metros. Usa la lista de ambientes para selección accesible."></canvas><div class="scale">1 m × 1 m <span>CUADRÍCULA MÉTRICA</span></div><div class="viewhint">Arrastra para girar · Rueda para acercar · Selecciona un ambiente</div></div><div class="playbar"><button class="primary" id="play">▶ Iniciar</button><button id="reset">↺ Reiniciar</button><span id="clock">00:00,0</span><label>Velocidad <select id="playback"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label><button id="exportRun">Exportar corrida ↓</button><button id="exportBlender" title="Modelo hipotético en metros; no BIM ni levantamiento">OBJ · Blender ↓</button></div><div id="roomButtons" class="roomlist" aria-label="Seleccionar ambiente"></div></section>
 <aside class="inspector"><div class="inspectorheading">INSPECTOR DEL AMBIENTE <span>↗</span></div><h2 id="roomName">Circulación</h2><p class="muted" id="roomDimensions"></p><div class="roomstats"><div><span>Ocupación</span><b id="roomOccupancy">0</b></div><div><span>Densidad</span><b id="roomDensity">0</b><small>personas/m²</small></div></div><label>Capacidad hipotética <input id="roomCapacity" type="number" min="1" max="200" value="30"></label><p class="hint">Límite del escenario. No es un aforo normativo ni considera mobiliario como área descontada.</p><h3>Capas de visualización</h3><div id="layers"></div><div class="legend"><i></i> Circulación <i class="waiting"></i> Espera</div><p class="hint">Los colores indican estados de movimiento; no representan emociones.</p></aside></div>
-<div class="lowergrid"><section class="panel"><h2>Parámetros del escenario <span class="badge">HIPÓTESIS</span></h2><p>Al aplicar cambios comienza una corrida nueva. Exporta la anterior para conservar sus resultados.</p><form id="scenarioForm" class="parametergrid"><label>Personas <input name="population" type="number" min="1" max="200" step="1" value="24" required></label><label>Semilla <input name="seed" type="number" min="0" max="4294967295" step="1" value="42" required></label><label>Velocidad base (m/s)<input name="speed" type="number" min="0.1" max="3" step="0.1" value="1.2" required></label><label>Intervalo de llegada (s)<input name="arrivalInterval" type="number" min="0.1" max="60" step="0.1" value="1.5" required></label><label>Permanencia (s)<input name="dwell" type="number" min="0" max="600" value="12" required></label><label>Demora de orientación (s)<input name="orientationDelay" type="number" min="0" max="60" step="0.1" value="1" required></label><label>Factor ambiental de velocidad<input name="environmentalMultiplier" type="number" min="0.2" max="2" step="0.1" value="1" required></label><button class="primary" type="submit">Aplicar escenario</button></form><p class="hint">El factor ambiental es una hipótesis matemática, sin relación causal validada con temperatura, ruido, bienestar o estrés.</p></section><section class="panel"><h2>Ocupación y puntos de espera</h2><div class="tablewrap"><table><thead><tr><th>Ambiente</th><th>Actual / límite</th><th>En espera</th><th>Pico</th></tr></thead><tbody id="occupancyTable"></tbody></table></div><p class="hint">Las colas se detectan en portales o ante capacidades llenas. Este modelo no resuelve colisiones entre personas.</p></section></div>
+<div class="lowergrid"><section class="panel"><h2>Parámetros del escenario <span class="badge">HIPÓTESIS</span></h2><p>Al aplicar cambios comienza una corrida nueva. Exporta la anterior para conservar sus resultados.</p><form id="scenarioForm" class="parametergrid"><label>Interacción física<select name="collisionAvoidance"><option value="0">Rutas por portales</option><option value="1">Separación física experimental</option></select></label><p>La separación experimental evita solapamientos con discos de radio 0,22 m; puede generar bloqueos sin resolver. Compara ambos modelos.</p><label>Personas <input name="population" type="number" min="1" max="200" step="1" value="24" required></label><label>Semilla <input name="seed" type="number" min="0" max="4294967295" step="1" value="42" required></label><label>Velocidad base (m/s)<input name="speed" type="number" min="0.1" max="3" step="0.1" value="1.2" required></label><label>Intervalo de llegada (s)<input name="arrivalInterval" type="number" min="0.1" max="60" step="0.1" value="1.5" required></label><label>Permanencia (s)<input name="dwell" type="number" min="0" max="600" value="12" required></label><label>Demora de orientación (s)<input name="orientationDelay" type="number" min="0" max="60" step="0.1" value="1" required></label><label>Factor ambiental de velocidad<input name="environmentalMultiplier" type="number" min="0.2" max="2" step="0.1" value="1" required></label><button class="primary" type="submit">Aplicar escenario</button></form><p class="hint">El factor ambiental es una hipótesis matemática, sin relación causal validada con temperatura, ruido, bienestar o estrés.</p></section><section class="panel"><h2>Ocupación y puntos de espera</h2><div class="tablewrap"><table><thead><tr><th>Ambiente</th><th>Actual / límite</th><th>En espera</th><th>Pico</th></tr></thead><tbody id="occupancyTable"></tbody></table></div><p class="hint">Las colas se detectan en portales o ante capacidades llenas. Este modelo no resuelve colisiones entre personas.</p></section></div>
 </section>
 <section data-panel="evidence" hidden><div class="panel"><h2>Registro con procedencia</h2><p>Los valores medidos, las observaciones profesionales, las hipótesis y las simulaciones se conservan por separado.</p><form id="evidenceForm" class="parametergrid"><label>Categoría<select name="kind"><option value="measured">Dato medido</option><option value="professional_observation">Observación profesional</option><option value="hypothetical">Parámetro hipotético</option></select></label><label>Indicador<input name="label" required maxlength="200" placeholder="Ej. Nivel sonoro"></label><label>Valor o descripción<input name="value" required maxlength="4000"></label><label>Unidad<input name="unit" maxlength="40" placeholder="dB(A), °C, descripción..."></label><label>Fuente / instrumento<input name="source" required maxlength="500"></label><label>Límites e incertidumbre<input name="limitations" required maxlength="1600" placeholder="Alcance de la muestra, calibración..."></label><button class="primary">Añadir registro</button></form></div><div class="panel spaced"><div class="tablewrap"><table><thead><tr><th>Procedencia</th><th>Indicador</th><th>Valor</th><th>Fuente</th><th>Límites</th></tr></thead><tbody id="evidenceTable"></tbody></table></div></div></section>
 <section data-panel="calibration" hidden><div class="panel"><h2>Dar escala a un plano</h2><p>Carga una imagen, marca dos extremos de una distancia conocida y escribe su longitud real en metros. Se aplica la misma escala a ambos ejes. Las fotografías en perspectiva deben rectificarse previamente.</p><div class="parametergrid"><label>Plano (PNG / JPEG / WebP, hasta 2,8 MB)<input id="planFile" type="file" accept="image/png,image/jpeg,image/webp"></label><label>Distancia real (m)<input id="referenceMeters" type="number" min="0.01" max="10000" step="0.01" value="5"></label><button id="calibrateBtn" class="primary">Aplicar referencia</button><button id="clearReference">Volver a marcar puntos</button></div><p id="calibrationStatus" class="notice">Sin plano calibrado. No se calculan dimensiones reales hasta definir una referencia.</p><canvas id="planCanvas" width="1000" height="600" aria-label="Plano: marca dos puntos para calibrar"></canvas><div class="parametergrid"><label>Punto A · X (px)<input id="ax" type="number" min="0"></label><label>Punto A · Y (px)<input id="ay" type="number" min="0"></label><label>Punto B · X (px)<input id="bx" type="number" min="0"></label><label>Punto B · Y (px)<input id="by" type="number" min="0"></label></div><p class="hint">Puedes introducir los puntos con teclado. La regla de 1,75 m es una comparación de longitud; no supone que una persona acostada sea una geometría de ocupación. El plano calibrado se guarda y exporta, pero no genera paredes, puertas ni rutas automáticamente.</p></div></section>
@@ -23,7 +23,7 @@
                                                                         
                                                                                  
                                                                                                                         
-                                                                                                                                                                    
+                                                                                                                                                                                                
 const defaults           ={population:24,seed:42,speed:1.2,arrivalInterval:1.5,dwell:12,orientationDelay:1,environmentalMultiplier:1};
 const demo      ={unit:'m',provenance:'hypothetical',entry:'hall',rooms:[
  {id:'hall',name:'Circulación',x:0,z:0,width:18,depth:3,capacity:30},
@@ -52,6 +52,25 @@ const center=(r     )      =>[r.x+r.width/2,r.z+r.depth/2];
 const area=(r     )=>r.width*r.depth;
 
 
+const BODY_RADIUS=.22;
+function walkable(scene      ,room     ,p      )        {
+ const r=BODY_RADIUS;
+ const inside=p[0]>=room.x+r&&p[0]<=room.x+room.width-r&&p[1]>=room.z+r&&p[1]<=room.z+room.depth-r;
+ const portal=scene.doors.some(d=>{if(d.a!==room.id&&d.b!==room.id)return false;const horizontal=Math.abs(d.at[1]-room.z)<1e-6||Math.abs(d.at[1]-room.z-room.depth)<1e-6;return horizontal?Math.abs(p[1]-d.at[1])<=r+.01&&Math.abs(p[0]-d.at[0])<=d.width/2-r:Math.abs(p[0]-d.at[0])<=r+.01&&Math.abs(p[1]-d.at[1])<=d.width/2-r});
+ return (inside||portal)&&!scene.furniture.some(f=>p[0]>f.x-r&&p[0]<f.x+f.width+r&&p[1]>f.z-r&&p[1]<f.z+f.depth+r);
+}
+function segmentDistance(p      ,a      ,b      )       {const x=b[0]-a[0],z=b[1]-a[1],l=x*x+z*z,t=l?Math.max(0,Math.min(1,((p[0]-a[0])*x+(p[1]-a[1])*z)/l)):0;return Math.hypot(p[0]-a[0]-t*x,p[1]-a[1]-t*z)}
+function freeMove(scene      ,room     ,from      ,to      ,others        )        {
+ if(others.some(p=>segmentDistance(p,from,to)<2*BODY_RADIUS-1e-8))return false;
+ const n=Math.max(1,Math.ceil(Math.hypot(to[0]-from[0],to[1]-from[1])/.04));for(let i=1;i<=n;i++)if(!walkable(scene,room,[from[0]+(to[0]-from[0])*i/n,from[1]+(to[1]-from[1])*i/n]))return false;return true;
+}
+function destinationPoint(scene      ,room     ,id       )      {
+ const points        =[];for(let z=room.z+.6;z<room.z+room.depth-.6;z+=.65)for(let x=room.x+.6;x<room.x+room.width-.6;x+=.65)if(walkable(scene,room,[x,z]))points.push([x,z]);
+ return points[id%points.length]||[room.x+room.width/2,room.z+room.depth/2];
+}
+
+
+
 
                                                                                                                                                                                                              
                                                                                                                                                      
@@ -62,6 +81,7 @@ function rng(seed       ){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013
 function createSimulation(scene      ,params           )           {
  for(const [k,v] of Object.entries(params))if(!Number.isFinite(v))throw Error('Parámetro no finito: '+k);
  if(!Number.isInteger(params.seed)||params.seed<0||params.seed>4294967295||!Number.isInteger(params.population)||params.population<1||params.population>200||params.speed<.1||params.speed>3||params.arrivalInterval<.1||params.arrivalInterval>60||params.dwell<0||params.dwell>600||params.orientationDelay<0||params.orientationDelay>60||params.environmentalMultiplier<.2||params.environmentalMultiplier>2)throw Error('Parámetros fuera de rango');
+ if(params.collisionAvoidance!==undefined&&![0,1].includes(params.collisionAvoidance))throw Error('Modelo de separación inválido');
  if(scene.provenance!=='hypothetical')throw Error('Este motor solo acepta geometría hipotética');
  if(scene.rooms.length<2||new Set(scene.rooms.map(r=>r.id)).size!==scene.rooms.length)throw Error('Ambientes inválidos');
  for(const r of scene.rooms)if(![r.x,r.z,r.width,r.depth,r.capacity].every(Number.isFinite)||r.width<=0||r.depth<=0||!Number.isInteger(r.capacity)||r.capacity<1)throw Error('Ambiente fuera de rango');
@@ -77,13 +97,18 @@ function step(s           )     {
  const count                      ={};for(const a of s.agents)if(a.phase!=='pending'&&a.phase!=='finished')count[a.room]=(count[a.room]||0)+1;
  for(const a of s.agents){
   if(a.phase==='finished')continue;
-  if(a.phase==='pending'){if(s.time<a.remaining)continue;const entry=s.scene.rooms.find(r=>r.id===a.room) ;if((count[a.room]||0)>=entry.capacity){a.wait+=dt;continue}a.phase='walking';a.remaining=s.params.orientationDelay;count[a.room]=(count[a.room]||0)+1;}
+  if(a.phase==='pending'){if(s.time<a.remaining)continue;const entry=s.scene.rooms.find(r=>r.id===a.room) ;if((count[a.room]||0)>=entry.capacity){a.wait+=dt;continue}if(s.params.collisionAvoidance===1&&s.agents.some(b=>b!==a&&b.phase!=='pending'&&b.phase!=='finished'&&Math.hypot(b.position[0]-a.position[0],b.position[1]-a.position[1])<2*BODY_RADIUS)){a.wait+=dt;continue}a.phase='walking';a.remaining=s.params.orientationDelay;count[a.room]=(count[a.room]||0)+1;}
   if(a.phase==='dwell'){a.remaining-=dt;if(a.remaining>0)continue;a.returning=true;a.path=route(s.scene,a.room,s.scene.entry);a.phase='walking';a.remaining=s.params.orientationDelay;}
   if(a.remaining>0){a.remaining=Math.max(0,a.remaining-dt);continue}
   const next=a.path[0],room=s.scene.rooms.find(r=>r.id===a.room) ;
   const door=next?s.scene.doors.find(d=>(d.a===a.room&&d.b===next)||(d.b===a.room&&d.a===next)):undefined;
-  const target=door?door.at:center(room),dx=target[0]-a.position[0],dz=target[1]-a.position[1],length=Math.hypot(dx,dz),travel=Math.min(length,s.params.speed*s.params.environmentalMultiplier*dt);
-  if(length>1e-9){a.position=[a.position[0]+dx/length*travel,a.position[1]+dz/length*travel];a.distance+=travel;a.phase='walking';if(travel<length)continue;}
+  const target=door?door.at:s.params.collisionAvoidance===1?destinationPoint(s.scene,room,a.id):center(room),dx=target[0]-a.position[0],dz=target[1]-a.position[1],length=Math.hypot(dx,dz),travel=Math.min(length,s.params.speed*s.params.environmentalMultiplier*dt);
+  if(length>1e-9){
+   const others=s.agents.filter(b=>b!==a&&b.phase!=='pending'&&b.phase!=='finished').map(b=>b.position);
+   let moved=false,direct=false;
+   for(const angle of [0,.45,-.45,.9,-.9,1.4,-1.4]){const c=Math.cos(angle),sn=Math.sin(angle),to      =[a.position[0]+(dx*c-dz*sn)/length*travel,a.position[1]+(dx*sn+dz*c)/length*travel];if(s.params.collisionAvoidance!==1||freeMove(s.scene,room,a.position,to,others)){a.position=to;a.distance+=travel;a.phase='walking';moved=true;direct=angle===0;break}}
+   if(!moved){a.phase='waiting';a.wait+=dt;continue}if(!direct||travel<length)continue;
+  }
   if(door&&next){const r=s.scene.rooms.find(r=>r.id===next) ;
    if((count[next]||0)>=r.capacity||(s.doorNext[door.id]||0)>s.time){a.phase='waiting';a.wait+=dt;continue;}
    s.doorNext[door.id]=s.time+1/(door.width*1.3);count[a.room]--;count[next]=(count[next]||0)+1;a.room=next;a.path.shift();a.phase='walking';a.remaining=s.params.orientationDelay;
@@ -92,7 +117,7 @@ function step(s           )     {
  for(const r of s.scene.rooms)s.peak[r.id]=Math.max(s.peak[r.id]||0,count[r.id]||0);
 }
 function metrics(s           ){return s.scene.rooms.map(r=>{const people=s.agents.filter(a=>a.room===r.id&&a.phase!=='pending'&&a.phase!=='finished');return{id:r.id,occupancy:people.length,capacity:r.capacity,density:people.length/area(r),queue:people.filter(a=>a.phase==='waiting').length,peak:s.peak[r.id]||0}})}
-function result(s           ){return{kind:'simulated'         ,engine:'phei-graph-1.0.0',time:s.time,seed:s.params.seed,parameters:s.params,scene:s.scene,metrics:metrics(s),completed:s.agents.filter(a=>a.phase==='finished').length,totalWait:s.agents.reduce((v,a)=>v+a.wait,0),distance:s.agents.reduce((v,a)=>v+a.distance,0),limitations:['Geometría hipotética en metros; no BIM ni GIS calibrado.','Modelo por portales, sin colisiones interpersonales ni evitación de mobiliario.','Capacidades y caudal de puertas son hipótesis, no aforo reglamentario.','No representa emociones, resultados clínicos ni evacuación oficial.']}}
+function result(s           ){return{kind:'simulated'         ,engine:'phei-graph-1.1.0',time:s.time,seed:s.params.seed,parameters:s.params,scene:s.scene,metrics:metrics(s),completed:s.agents.filter(a=>a.phase==='finished').length,totalWait:s.agents.reduce((v,a)=>v+a.wait,0),distance:s.agents.reduce((v,a)=>v+a.distance,0),limitations:['Geometría hipotética en metros; no BIM ni GIS calibrado.',s.params.collisionAvoidance===1?'Separación experimental con discos de radio 0,22 m; evitación local, sin resolver bloqueos globales.':'Modelo por portales sin colisiones interpersonales ni evitación de mobiliario.','Capacidades y caudal de puertas son hipótesis, no aforo reglamentario.','No representa emociones, resultados clínicos ni evacuación oficial.']}}
 
 
 
@@ -165,6 +190,88 @@ function calibrate(a      ,b      ,referenceMeters       ,imageWidth       ,imag
 function scaledArea(polygon        ,c            ){let twice=0;for(let i=0;i<polygon.length;i++){const [x,y]=polygon[i],[xx,yy]=polygon[(i+1)%polygon.length];twice+=x*yy-xx*y}return Math.abs(twice)*.5*c.metersPerPixel**2}
 
 
+/**
+ * Exportación OBJ para Blender desde el mismo modelo espacial de PHEI.
+ * El sistema de unidades es metros, pero el edificio demuestra una geometría hipotética.
+ * No exporta BIM, mapa georreferenciado ni datos clínicos.
+ */
+function exportBlenderOBJ(scene      )        {
+  if(scene.unit!=='m'||scene.provenance!=='hypothetical')throw Error('Solo se admite escena hipotética expresada en metros');
+  if(!Array.isArray(scene.rooms)||!scene.rooms.length||scene.rooms.length>250)throw Error('Ambientes inválidos');
+  const out         =[
+    '# PHEI DIGITAL TWIN — BLENDER OBJ',
+    '# units: meters; coordinate system: X right, Y up, Z depth',
+    '# GEOMETRIA HIPOTETICA — NO BIM / NO LEVANTAMIENTO / NO AFORO',
+    '# Aperturas representadas esquematicamente. Verificar cualquier medida real.'
+  ];
+  let next=1;
+  function vertex(x       ,y       ,z       )        {
+    if(![x,y,z].every(Number.isFinite))throw Error('Coordenadas no finitas');
+    out.push('v '+[x,y,z].map(n=>n.toFixed(5)).join(' '));
+    return next++;
+  }
+  function face(indices         ){out.push('f '+indices.join(' '))}
+  function object(name       ){out.push('o '+name.replace(/[^a-zA-Z0-9_-]/g,'_'))}
+  function box(name       ,x       ,y       ,z       ,width       ,height       ,depth       ) {
+    if(![x,y,z,width,height,depth].every(Number.isFinite)||width<=0||height<=0||depth<=0)throw Error('Caja inválida');
+    object(name);
+    const a=vertex(x,y,z),b=vertex(x+width,y,z),c=vertex(x+width,y,z+depth),d=vertex(x,y,z+depth);
+    const e=vertex(x,y+height,z),f=vertex(x+width,y+height,z),g=vertex(x+width,y+height,z+depth),h=vertex(x,y+height,z+depth);
+    face([a,d,c,b]);face([e,f,g,h]);face([a,b,f,e]);face([b,c,g,f]);face([c,d,h,g]);face([d,a,e,h]);
+  }
+  const edges=new Map                                                                         ();
+  const line=(horizontal        ,coordinate       ,start       ,end       )=>{
+    const key=(horizontal?'h':'v')+':'+coordinate.toFixed(5);
+    if(!edges.has(key))edges.set(key,[]);
+    edges.get(key) .push({horizontal,coordinate,start:Math.min(start,end),end:Math.max(start,end)});
+  };
+  for(const room of scene.rooms){
+    if(![room.x,room.z,room.width,room.depth].every(Number.isFinite)||room.width<=0||room.depth<=0)throw Error('Geometría de ambiente inválida');
+    if(room.width>10000||room.depth>10000)throw Error('Geometría fuera de rango');
+    box('PHEI_Piso_'+room.id,room.x,-.08,room.z,room.width,.08,room.depth);
+    line(true,room.z,room.x,room.x+room.width);
+    line(true,room.z+room.depth,room.x,room.x+room.width);
+    line(false,room.x,room.z,room.z+room.depth);
+    line(false,room.x+room.width,room.z,room.z+room.depth);
+  }
+  // Los bordes compartidos se segmentan por puntos de corte para no duplicar muros.
+  let wallIndex=0;
+  for(const [key,segments] of edges){
+    const {horizontal,coordinate}=segments[0];
+    const limit=(n       )=>Math.round(n*100000)/100000;
+    const cut=new Set        ();
+    for(const s of segments){cut.add(limit(s.start));cut.add(limit(s.end))}
+    const openings                            =[];
+    for(const d of scene.doors){
+      if(!Number.isFinite(d.width)||d.width<=0||!d.at.every(Number.isFinite))throw Error('Puerta inválida');
+      if(Math.abs((horizontal?d.at[1]:d.at[0])-coordinate)>1e-6)continue;
+      const center=horizontal?d.at[0]:d.at[1],open={start:center-d.width/2,end:center+d.width/2};
+      if(segments.some(s=>center>=s.start&&center<=s.end)){
+        openings.push(open);cut.add(limit(open.start));cut.add(limit(open.end));
+      }
+    }
+    const values=[...cut].sort((a,b)=>a-b);
+    for(let i=0;i<values.length-1;i++){
+      const a=values[i],b=values[i+1],mid=(a+b)/2;
+      if(b-a<1e-5||!segments.some(s=>mid>=s.start-1e-5&&mid<=s.end+1e-5))continue;
+      const door=openings.some(d=>mid>=d.start-1e-5&&mid<=d.end+1e-5);
+      const thickness=.12,base=door?2.1:0,height=door?.7:2.8;
+      if(horizontal)box('PHEI_Muro_'+(++wallIndex),a,base,coordinate-thickness/2,b-a,height,thickness);
+      else box('PHEI_Muro_'+(++wallIndex),coordinate-thickness/2,base,a,thickness,height,b-a);
+    }
+  }
+  for(const f of scene.furniture){
+    if(![f.x,f.z,f.width,f.depth].every(Number.isFinite)||f.width<=0||f.depth<=0)throw Error('Mobiliario inválido');
+    const h=f.id==='bench'||f.id==='seat'?.45:.75;
+    box('PHEI_Mobiliario_'+f.id,f.x,0,f.z,f.width,h,f.depth);
+  }
+  // Indicador visual de proporción, no personaje medido ni objeto BIM.
+  box('PHEI_Referencia_Humana_1_75m',19,0,4,.4,1.75,.25);
+  return out.join('\n')+'\n';
+}
+
+
+
 
 
 
@@ -180,6 +287,7 @@ let workspace=empty(),simulation=createSimulation(workspace.scene,workspace.para
 const viewer=createViewer(el                   ('sceneCanvas'),id=>{selection=id;renderRoom();render()});
 function announce(message       ){const box=el('toast');box.textContent=message;box.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>box.hidden=true,7000)}
 function download(name       ,value        ){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+function downloadBlender(){try{const text=exportBlenderOBJ(workspace.scene);const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='PHEI_modelo_hipotetico_metros.obj';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);announce('OBJ exportado. Escena hipotética: verifica escala y dimensiones antes de aplicarla.')}catch(error){announce('No se exportó OBJ: '+String(error))}}
 function button(text       ,action         ){const b=document.createElement('button');b.type='button';b.textContent=text;b.onclick=action;return b}
 function cell(row                    ,text       ){const td=document.createElement('td');td.textContent=text;row.append(td)}
 function render(){
@@ -201,6 +309,7 @@ document.querySelectorAll                   ('[data-tab]').forEach(b=>b.onclick=
 el('play').onclick=()=>{running=!running;last=0;el('play').textContent=running?'Ⅱ Pausar':'▶ Continuar'};el('reset').onclick=reset;
 el('roomCapacity').onchange=()=>{const input=el                  ('roomCapacity'),v=Number(input.value);if(!Number.isInteger(v)||v<1||v>200){announce('Capacidad entre 1 y 200 personas');renderRoom();return}archiveRun();workspace.scene.rooms.find(r=>r.id===selection) .capacity=v;reset();announce('Capacidad hipotética actualizada. Corrida reiniciada.')};
 el                 ('scenarioForm').onsubmit=e=>{e.preventDefault();const f=new FormData(el                 ('scenarioForm'));const parameters=Object.fromEntries([...f.entries()].map(([k,v])=>[k,Number(v)]))                         ;try{createSimulation(workspace.scene,parameters);archiveRun();workspace.parameters=parameters;reset();announce('Nuevo escenario preparado')}catch(error){announce(String(error))}};
+el('exportBlender').onclick=downloadBlender;
 el('exportRun').onclick=()=>{const r={...result(simulation),id:runId};archiveRun();download('PHEI_corrida_simulada.json',r);workspace.evidence.push({id:uid(),kind:'simulated',label:'Espera acumulada de corrida exportada',value:r.totalWait,unit:'persona·s',source:r.engine+' · semilla '+r.seed+' · t='+r.time+' s',recorded_at:new Date().toISOString(),limitations:r.limitations.join(' '),run_id:runId});renderEvidence()};
 function renderEvidence(){const body=el('evidenceTable');body.replaceChildren();for(const evidence of workspace.evidence){const row=document.createElement('tr');cell(row,categories[evidence.kind]);cell(row,evidence.label);cell(row,String(evidence.value)+' '+evidence.unit);cell(row,evidence.source);cell(row,evidence.limitations);body.append(row)}if(!workspace.evidence.length){const row=document.createElement('tr');cell(row,'Sin registros. Añade evidencia o exporta una corrida para registrar su resultado simulado.');body.append(row)}}
 el                 ('evidenceForm').onsubmit=e=>{e.preventDefault();const f=new FormData(el                 ('evidenceForm'));workspace.evidence.push({id:uid(),kind:String(f.get('kind'))                      ,label:String(f.get('label')),value:String(f.get('value')),unit:String(f.get('unit')),source:String(f.get('source')),recorded_at:new Date().toISOString(),limitations:String(f.get('limitations'))});renderEvidence();el                 ('evidenceForm').reset();announce('Registro añadido. Guarda una versión para conservarlo.')};
@@ -215,7 +324,7 @@ function validated(value        )          {const w=value             ;if(!w||w.
  const ids=new Set        ();for(const r of w.evidence){if(!r||!Object.hasOwn(categories,r.kind)||typeof r.id!=='string'||ids.has(r.id)||typeof r.label!=='string'||r.label.length>200||!(typeof r.value==='string'||Number.isFinite(r.value))||typeof r.unit!=='string'||typeof r.source!=='string'||typeof r.limitations!=='string'||typeof r.recorded_at!=='string'||Number.isNaN(Date.parse(r.recorded_at))||(r.kind==='simulated'&&!r.run_id))throw Error('Evidencia inválida');ids.add(r.id)}
  if(w.plan!==null&&(typeof w.plan!=='string'||!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(w.plan)))throw Error('Imagen inválida');if(w.legacyArchive!==null&&typeof w.legacyArchive!=='string')throw Error('Archivo clásico inválido');
  if(w.calibration){const c=w.calibration;const valid=calibrate(c.a,c.b,c.referenceMeters,c.imageWidth,c.imageHeight);if(Math.abs(c.metersPerPixel-valid.metersPerPixel)>1e-10)throw Error('Escala inconsistente');w.calibration=valid}return structuredClone(w)}
-function load(w        ){const next=validated(w);stop();next.id=uid();workspace=next;remoteId='';remoteRevision=0;selection='hall';el                  ('projectName').value=workspace.name;el('projectLabel').textContent=workspace.name;for(const [key,value] of Object.entries(workspace.parameters)){const input=el                 ('scenarioForm').elements.namedItem(key)                    ;input.value=String(value)}simulation=createSimulation(workspace.scene,workspace.parameters);runId=uid();accumulator=0;el('play').textContent='▶ Iniciar';planPoints=workspace.calibration?[workspace.calibration.a,workspace.calibration.b]:[];loadPlanImage();renderRoom();renderEvidence();render()}
+function load(w        ){const next=validated(w);stop();next.id=uid();workspace=next;remoteId='';remoteRevision=0;selection='hall';el                  ('projectName').value=workspace.name;el('projectLabel').textContent=workspace.name;for(const [key,value] of Object.entries({collisionAvoidance:0,...workspace.parameters})){const input=el                 ('scenarioForm').elements.namedItem(key)                    ;input.value=String(value)}simulation=createSimulation(workspace.scene,workspace.parameters);runId=uid();accumulator=0;el('play').textContent='▶ Iniciar';planPoints=workspace.calibration?[workspace.calibration.a,workspace.calibration.b]:[];loadPlanImage();renderRoom();renderEvidence();render()}
 el('saveProject').onclick=save;el('exportProject').onclick=()=>{archiveRun();workspace.name=el                  ('projectName').value.trim()||workspace.name;workspace.updated=new Date().toISOString();download('PHEI_proyecto.json',workspace)};
 el('newProject').onclick=()=>{if(!save())return;load(empty());announce('Proyecto nuevo creado; se guardó la versión anterior.')};
 el                  ('importProject').onchange=async e=>{const file=(e.target                    ).files?.[0];if(!file)return;try{if(file.size>12e6)throw Error('Archivo mayor de 12 MB');const next=validated(JSON.parse(await file.text()));if(!save())return;load(next);announce('Proyecto importado como copia; guarda una versión.')}catch(error){announce(String(error))}(e.target                    ).value=''};

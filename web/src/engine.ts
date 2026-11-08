@@ -1,3 +1,4 @@
+import {freeMove,destinationPoint,BODY_RADIUS} from './navigation.ts';
 import {center,area} from './model.ts';
 import type {Scene,Parameters,Point} from './model.ts';
 export interface Agent {id:number;room:string;position:Point;path:string[];destination:string;phase:'pending'|'walking'|'waiting'|'dwell'|'finished';remaining:number;wait:number;distance:number;returning:boolean}
@@ -9,6 +10,7 @@ function rng(seed:number){let x=seed>>>0;return()=>{x=(Math.imul(1664525,x)+1013
 export function createSimulation(scene:Scene,params:Parameters):Simulation{
  for(const [k,v] of Object.entries(params))if(!Number.isFinite(v))throw Error('Parámetro no finito: '+k);
  if(!Number.isInteger(params.seed)||params.seed<0||params.seed>4294967295||!Number.isInteger(params.population)||params.population<1||params.population>200||params.speed<.1||params.speed>3||params.arrivalInterval<.1||params.arrivalInterval>60||params.dwell<0||params.dwell>600||params.orientationDelay<0||params.orientationDelay>60||params.environmentalMultiplier<.2||params.environmentalMultiplier>2)throw Error('Parámetros fuera de rango');
+ if(params.collisionAvoidance!==undefined&&![0,1].includes(params.collisionAvoidance))throw Error('Modelo de separación inválido');
  if(scene.provenance!=='hypothetical')throw Error('Este motor solo acepta geometría hipotética');
  if(scene.rooms.length<2||new Set(scene.rooms.map(r=>r.id)).size!==scene.rooms.length)throw Error('Ambientes inválidos');
  for(const r of scene.rooms)if(![r.x,r.z,r.width,r.depth,r.capacity].every(Number.isFinite)||r.width<=0||r.depth<=0||!Number.isInteger(r.capacity)||r.capacity<1)throw Error('Ambiente fuera de rango');
@@ -24,13 +26,18 @@ export function step(s:Simulation):void{
  const count:Record<string,number>={};for(const a of s.agents)if(a.phase!=='pending'&&a.phase!=='finished')count[a.room]=(count[a.room]||0)+1;
  for(const a of s.agents){
   if(a.phase==='finished')continue;
-  if(a.phase==='pending'){if(s.time<a.remaining)continue;const entry=s.scene.rooms.find(r=>r.id===a.room)!;if((count[a.room]||0)>=entry.capacity){a.wait+=dt;continue}a.phase='walking';a.remaining=s.params.orientationDelay;count[a.room]=(count[a.room]||0)+1;}
+  if(a.phase==='pending'){if(s.time<a.remaining)continue;const entry=s.scene.rooms.find(r=>r.id===a.room)!;if((count[a.room]||0)>=entry.capacity){a.wait+=dt;continue}if(s.params.collisionAvoidance===1&&s.agents.some(b=>b!==a&&b.phase!=='pending'&&b.phase!=='finished'&&Math.hypot(b.position[0]-a.position[0],b.position[1]-a.position[1])<2*BODY_RADIUS)){a.wait+=dt;continue}a.phase='walking';a.remaining=s.params.orientationDelay;count[a.room]=(count[a.room]||0)+1;}
   if(a.phase==='dwell'){a.remaining-=dt;if(a.remaining>0)continue;a.returning=true;a.path=route(s.scene,a.room,s.scene.entry);a.phase='walking';a.remaining=s.params.orientationDelay;}
   if(a.remaining>0){a.remaining=Math.max(0,a.remaining-dt);continue}
   const next=a.path[0],room=s.scene.rooms.find(r=>r.id===a.room)!;
   const door=next?s.scene.doors.find(d=>(d.a===a.room&&d.b===next)||(d.b===a.room&&d.a===next)):undefined;
-  const target=door?door.at:center(room),dx=target[0]-a.position[0],dz=target[1]-a.position[1],length=Math.hypot(dx,dz),travel=Math.min(length,s.params.speed*s.params.environmentalMultiplier*dt);
-  if(length>1e-9){a.position=[a.position[0]+dx/length*travel,a.position[1]+dz/length*travel];a.distance+=travel;a.phase='walking';if(travel<length)continue;}
+  const target=door?door.at:s.params.collisionAvoidance===1?destinationPoint(s.scene,room,a.id):center(room),dx=target[0]-a.position[0],dz=target[1]-a.position[1],length=Math.hypot(dx,dz),travel=Math.min(length,s.params.speed*s.params.environmentalMultiplier*dt);
+  if(length>1e-9){
+   const others=s.agents.filter(b=>b!==a&&b.phase!=='pending'&&b.phase!=='finished').map(b=>b.position);
+   let moved=false,direct=false;
+   for(const angle of [0,.45,-.45,.9,-.9,1.4,-1.4]){const c=Math.cos(angle),sn=Math.sin(angle),to:Point=[a.position[0]+(dx*c-dz*sn)/length*travel,a.position[1]+(dx*sn+dz*c)/length*travel];if(s.params.collisionAvoidance!==1||freeMove(s.scene,room,a.position,to,others)){a.position=to;a.distance+=travel;a.phase='walking';moved=true;direct=angle===0;break}}
+   if(!moved){a.phase='waiting';a.wait+=dt;continue}if(!direct||travel<length)continue;
+  }
   if(door&&next){const r=s.scene.rooms.find(r=>r.id===next)!;
    if((count[next]||0)>=r.capacity||(s.doorNext[door.id]||0)>s.time){a.phase='waiting';a.wait+=dt;continue;}
    s.doorNext[door.id]=s.time+1/(door.width*1.3);count[a.room]--;count[next]=(count[next]||0)+1;a.room=next;a.path.shift();a.phase='walking';a.remaining=s.params.orientationDelay;
@@ -39,4 +46,4 @@ export function step(s:Simulation):void{
  for(const r of s.scene.rooms)s.peak[r.id]=Math.max(s.peak[r.id]||0,count[r.id]||0);
 }
 export function metrics(s:Simulation){return s.scene.rooms.map(r=>{const people=s.agents.filter(a=>a.room===r.id&&a.phase!=='pending'&&a.phase!=='finished');return{id:r.id,occupancy:people.length,capacity:r.capacity,density:people.length/area(r),queue:people.filter(a=>a.phase==='waiting').length,peak:s.peak[r.id]||0}})}
-export function result(s:Simulation){return{kind:'simulated' as const,engine:'phei-graph-1.0.0',time:s.time,seed:s.params.seed,parameters:s.params,scene:s.scene,metrics:metrics(s),completed:s.agents.filter(a=>a.phase==='finished').length,totalWait:s.agents.reduce((v,a)=>v+a.wait,0),distance:s.agents.reduce((v,a)=>v+a.distance,0),limitations:['Geometría hipotética en metros; no BIM ni GIS calibrado.','Modelo por portales, sin colisiones interpersonales ni evitación de mobiliario.','Capacidades y caudal de puertas son hipótesis, no aforo reglamentario.','No representa emociones, resultados clínicos ni evacuación oficial.']}}
+export function result(s:Simulation){return{kind:'simulated' as const,engine:'phei-graph-1.1.0',time:s.time,seed:s.params.seed,parameters:s.params,scene:s.scene,metrics:metrics(s),completed:s.agents.filter(a=>a.phase==='finished').length,totalWait:s.agents.reduce((v,a)=>v+a.wait,0),distance:s.agents.reduce((v,a)=>v+a.distance,0),limitations:['Geometría hipotética en metros; no BIM ni GIS calibrado.',s.params.collisionAvoidance===1?'Separación experimental con discos de radio 0,22 m; evitación local, sin resolver bloqueos globales.':'Modelo por portales sin colisiones interpersonales ni evitación de mobiliario.','Capacidades y caudal de puertas son hipótesis, no aforo reglamentario.','No representa emociones, resultados clínicos ni evacuación oficial.']}}

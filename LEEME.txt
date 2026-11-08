@@ -39,6 +39,7 @@ ALCANCE
 Preview exploratoria; no equivale a un producto científicamente validado.
 No hay un servidor público configurado.
 No se encontró 0.6; se conserva 0.5.
-React es complementario; el motor no resuelve colisiones.
+React es complementario. El modo físico experimental evita solapamientos y obstáculos,
+pero puede producir bloqueos; el modo de portales continúa disponible para comparar.
 RAG sigue inactivo hasta disponer de fuentes verificadas.
 No representa emociones reales, resultados clínicos ni evacuación oficial.

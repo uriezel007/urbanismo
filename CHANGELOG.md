@@ -1,5 +1,12 @@
 # Historial de cambios
 
+## Ampliación — 2026-11-08
+
+- Entrega única con fuentes, ambos visores compilados, capturas, guía de inicio y sumas SHA-256.
+- Modo experimental de separación física y evitación local de obstáculos, con tres pruebas de invariantes.
+- Conservación del modelo de portales para comparar hipótesis; bloqueos físicos explicitados.
+- Referencia editorial de Brusilovsky comprobada y límites documentales en FUENTES.md.
+
 ## 1.0.0-preview.1 — 2026-10-11
 
 - Conservación exacta de PHEI 0.5; búsqueda de 0.6 documentada sin resultados.

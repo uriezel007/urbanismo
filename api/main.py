@@ -197,7 +197,7 @@ def create_app(database_url=None, origin=None, production=None):
         return [
             {'id': 'preser-nic', 'title': 'PRESER-NIC', 'status': 'methodological_unverified', 'limit': 'Documento original no disponible en el repositorio; sin validación psicométrica comprobada.'},
             {'id': 'ciudad-regula', 'title': 'La Ciudad que Regula', 'status': 'methodological_unverified', 'limit': 'Marco metodológico propio; afirmaciones causales no verificadas.'},
-            {'id': 'brusilovsky', 'title': 'Accesibilidad cognitiva — Berta Brusilovsky', 'status': 'bibliographic_reference', 'limit': 'Referencia conceptual; no se ha verificado la obra completa ni validado la rúbrica PHEI.'}
+            {'id': 'brusilovsky', 'title': 'Accesibilidad cognitiva — Berta Brusilovsky', 'status': 'publisher_metadata_verified', 'url': 'https://revistas.ulima.edu.pe/index.php/Limaq/article/view/5380', 'doi': '10.26439/limaq2022.n009.5380', 'checked_at': '2026-11-08', 'limit': 'Metadatos y resumen verificados en la revista; no valida la rúbrica PHEI, la simulación ni un diagnóstico clínico.'}
         ]
 
     @app.post('/api/rag/query')
