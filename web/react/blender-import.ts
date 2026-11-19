@@ -51,7 +51,7 @@ export function inspectBlenderFile(name:string,data:ArrayBuffer):CheckedModel{
   throw Error('Modelo demasiado complejo o sin nodos/mallas.');
  if((doc.materials?.length||0)>250)throw Error('Demasiados materiales.');
  if(!Array.isArray(doc.accessors)||doc.accessors.length>2000||
-    doc.accessors.reduce((total,a)=>total+(Number.isInteger(a.count)&&a.count!>=0?a.count!:1_500_001),0)>1_500_000)
+    doc.accessors.reduce((total,a)=>total+(typeof a.count==='number'&&Number.isInteger(a.count)&&a.count>=0?a.count:1_500_001),0)>1_500_000)
   throw Error('Modelo demasiado grande para el visor exploratorio.');
  if((doc.extensionsRequired||[]).some(e=>['KHR_draco_mesh_compression','EXT_meshopt_compression','KHR_texture_basisu'].includes(e)))
   throw Error('Esta versión no admite mallas/texturas comprimidas. Exporta GLB sin compresión.');
