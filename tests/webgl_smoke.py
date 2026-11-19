@@ -1,6 +1,8 @@
 """Chromium + SwiftShader checks for PHEI React WebGL, desktop and mobile viewport."""
+import base64
 import json
 import re
+import struct
 import subprocess
 import time
 from pathlib import Path
@@ -44,6 +46,33 @@ try:
             page.get_by_role('button',name='Sala de espera',exact=True).click()
             expect(page.get_by_role('heading',name='Sala de espera',exact=True)).to_be_visible()
             page.screenshot(path=str(root/f'artifacts/phei-webgl-mobile-{width}.png'),full_page=True)
+
+        # Blender: embedded-only glTF is visible, without changing simulation metrics.
+        vertices=struct.pack('<9f',0,0,0,2,0,0,0,0,2)
+        model={
+            'asset':{'version':'2.0'},'buffers':[{'byteLength':len(vertices),
+                 'uri':'data:application/octet-stream;base64,'+base64.b64encode(vertices).decode()}],
+            'bufferViews':[{'buffer':0,'byteOffset':0,'byteLength':len(vertices)}],
+            'accessors':[{'bufferView':0,'componentType':5126,'count':3,'type':'VEC3',
+                          'min':[0,0,0],'max':[2,0,2]}],
+            'meshes':[{'primitives':[{'attributes':{'POSITION':0}}]}],
+            'nodes':[{'mesh':0}],'scenes':[{'nodes':[0]}],'scene':0}
+        stage_metrics=page.get_by_test_id('completed-agents').inner_text()
+        page.get_by_test_id('blender-file').set_input_files({
+            'name':'ambiente.gltf','mimeType':'model/gltf+json',
+            'buffer':json.dumps(model).encode()})
+        expect(page.get_by_test_id('blender-imported')).to_contain_text('ambiente.gltf',timeout=30000)
+        assert page.get_by_test_id('completed-agents').inner_text()==stage_metrics
+        expect(page.locator('.phei-gl-scenenote')).to_contain_text('BLENDER: CAPA VISUAL')
+        # A failed second import must leave the valid current model untouched.
+        model['buffers']=[{'uri':'https://example.com/external.bin','byteLength':len(vertices)}]
+        page.get_by_test_id('blender-file').set_input_files({
+            'name':'inseguro.gltf','mimeType':'model/gltf+json',
+            'buffer':json.dumps(model).encode()})
+        expect(page.get_by_role('status').last).to_contain_text('No se permiten recursos externos',timeout=15000)
+        expect(page.get_by_test_id('blender-imported')).to_contain_text('ambiente.gltf')
+        page.get_by_role('button',name='Retirar modelo').click()
+        expect(page.get_by_test_id('blender-imported')).to_have_count(0)
 
         # The same-origin handoff transfers scene + parameters, not sensitive observations.
         scene={'unit':'m','provenance':'hypothetical','entry':'hall','rooms':[
