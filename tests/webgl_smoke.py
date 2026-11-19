@@ -64,13 +64,26 @@ try:
         expect(page.get_by_test_id('blender-imported')).to_contain_text('ambiente.gltf',timeout=30000)
         assert page.get_by_test_id('completed-agents').inner_text()==stage_metrics
         expect(page.locator('.phei-gl-scenenote')).to_contain_text('BLENDER: CAPA VISUAL')
+        # Equivalent GLB (Blender's recommended export) is loaded via the same UI.
+        glb_doc={**model,'buffers':[{'byteLength':len(vertices)}]}
+        json_chunk=json.dumps(glb_doc,separators=(',',':')).encode()
+        json_chunk+=b' '*((-len(json_chunk))%4)
+        bin_chunk=vertices+b'\x00'*((-len(vertices))%4)
+        glb_size=12+8+len(json_chunk)+8+len(bin_chunk)
+        glb=(struct.pack('<III',0x46546c67,2,glb_size)
+             +struct.pack('<II',len(json_chunk),0x4e4f534a)+json_chunk
+             +struct.pack('<II',len(bin_chunk),0x004e4942)+bin_chunk)
+        page.get_by_test_id('blender-file').set_input_files({
+            'name':'ambiente.glb','mimeType':'model/gltf-binary','buffer':glb})
+        expect(page.get_by_test_id('blender-imported')).to_contain_text('ambiente.glb',timeout=30000)
+        assert page.get_by_test_id('completed-agents').inner_text()==stage_metrics
         # A failed second import must leave the valid current model untouched.
         model['buffers']=[{'uri':'https://example.com/external.bin','byteLength':len(vertices)}]
         page.get_by_test_id('blender-file').set_input_files({
             'name':'inseguro.gltf','mimeType':'model/gltf+json',
             'buffer':json.dumps(model).encode()})
         expect(page.get_by_role('status').last).to_contain_text('No se permiten recursos externos',timeout=15000)
-        expect(page.get_by_test_id('blender-imported')).to_contain_text('ambiente.gltf')
+        expect(page.get_by_test_id('blender-imported')).to_contain_text('ambiente.glb')
         page.get_by_role('button',name='Retirar modelo').click()
         expect(page.get_by_test_id('blender-imported')).to_have_count(0)
 
