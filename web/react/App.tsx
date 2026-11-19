@@ -1,12 +1,14 @@
-import React,{Component,useEffect,useMemo,useState} from 'react';
+import React,{Component,useEffect,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Canvas} from '@react-three/fiber';
+import {Canvas,useThree} from '@react-three/fiber';
 import {OrbitControls,Grid,Html} from '@react-three/drei';
 import {demo,defaults,center} from '../src/model.ts';
 import type {Scene,Parameters,Room} from '../src/model.ts';
 import {createSimulation,step,metrics,result} from '../src/engine.ts';
 import type {Simulation,Agent} from '../src/engine.ts';
 import {PERSON_HEIGHT,DOOR_HEIGHT,WALL_HEIGHT} from '../src/viewer.ts';
+import {disposeBlenderAsset,loadBlenderAsset} from './blender-import.ts';
+import type {BlenderAsset} from './blender-import.ts';
 import './webgl.css';
 
 type ViewMode='perspective'|'plan';
@@ -82,6 +84,20 @@ function exportRun(sim:Simulation){
  const a=document.createElement('a');a.href=url;a.download='PHEI_webgl_corrida_sintetica.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 
+function FocusModel({asset,view}:{asset:BlenderAsset|null;view:ViewMode}){
+ const {camera}=useThree();
+ useEffect(()=>{
+  if(!asset)return;
+  const [x,y,z]=asset.center;
+  const extent=Math.max(asset.width,asset.height,asset.depth,6);
+  if(view==='plan')camera.position.set(x,y+extent*2.2,z+.01);
+  else camera.position.set(x+extent*1.45,y+extent*1.1,z+extent*1.45);
+  camera.lookAt(x,y,z);
+  camera.updateProjectionMatrix();
+ },[asset,camera,view]);
+ return null;
+}
+
 function WebGLApp(){
  const [scene]=useState(()=>initial.scene);
  const [params,setParams]=useState(()=>initial.params);
@@ -93,6 +109,13 @@ function WebGLApp(){
  const [population,setPopulation]=useState(String(initial.params.population));
  const [playback,setPlayback]=useState(1);
  const [message,setMessage]=useState('');
+ const [blender,setBlender]=useState<BlenderAsset|null>(null);
+ const [loadingModel,setLoadingModel]=useState(false);
+ const [showBlender,setShowBlender]=useState(true);
+ const [showPheiGeometry,setShowPheiGeometry]=useState(true);
+ const request=useRef(0);
+ useEffect(()=>()=>{request.current++;},[]);
+ useEffect(()=>()=>{if(blender)disposeBlenderAsset(blender);},[blender]);
  const segments=useMemo(()=>createWalls(scene),[scene]);
  const values=metrics(sim);
  const selectedRoom=scene.rooms.find(r=>r.id===selected) || scene.rooms[0];
@@ -126,6 +149,24 @@ function WebGLApp(){
   setMessage('Población hipotética actualizada. Se inició una nueva corrida.');
  }
  function chooseRoom(id:string){setSelected(id)}
+ async function importBlender(file:File|undefined){
+  if(!file)return;
+  const requestId=++request.current;
+  setLoadingModel(true);
+  setMessage('Comprobando archivo local, sin enviarlo al servidor…');
+  try{
+   const model=await loadBlenderAsset(file);
+   if(requestId!==request.current){disposeBlenderAsset(model);return;}
+   setBlender(model);setShowBlender(true);setShowPheiGeometry(false);setShowAgents(false);
+   setMessage('Modelo cargado únicamente como referencia visual. Las rutas y métricas siguen basadas en la escena PHEI.');
+  }catch(error){
+   if(requestId===request.current)setMessage(error instanceof Error?error.message:'No se pudo abrir el modelo.');
+  }finally{if(requestId===request.current)setLoadingModel(false);}
+ }
+ function removeBlender(){
+  request.current++;setLoadingModel(false);setBlender(null);setShowPheiGeometry(true);setShowAgents(true);
+  setMessage('Modelo externo retirado; se conserva la escena PHEI original.');
+ }
  return <div className="phei-gl">
   <header className="phei-gl-header">
    <div className="phei-gl-brand"><span className="phei-gl-logo">P·</span><div><strong>PHEI DIGITAL TWIN</strong><small>PRESER · HUMAN ENVIRONMENT INTELLIGENCE</small></div></div>
@@ -147,21 +188,23 @@ function WebGLApp(){
      <div className="phei-gl-viewhead"><div><b>PLANTA 01 · ESCENA INTERACTIVA</b><small>Arrastra para girar · Pellizca para ampliar</small></div><div className="phei-gl-segment"><button type="button" className={view==='perspective'?'active':''} aria-pressed={view==='perspective'} onClick={()=>setView('perspective')}>Perspectiva</button><button type="button" className={view==='plan'?'active':''} aria-pressed={view==='plan'} onClick={()=>setView('plan')}>Planta</button></div></div>
      <div className="phei-gl-stage" data-testid="webgl-stage">
       <WebGLBoundary><Canvas key={view} dpr={[1,1.6]} gl={{antialias:true,powerPreference:'default'}} camera={{position:view==='plan'?[9,29,1]:[25,23,27],fov:44,near:.1,far:220}} fallback={<p className="webgl-error">WebGL no disponible en este navegador. <a href="/">Abrir visor compatible</a></p>}>
+       <FocusModel asset={showBlender?blender:null} view={view}/>
        <color attach="background" args={['#10252a']}/><ambientLight intensity={1.25}/>
        <directionalLight position={[2,18,7]} intensity={1.8}/>
        <Grid position={[9,-.07,1]} args={[25,19]} cellSize={1} sectionSize={5} cellColor="#43615e" sectionColor="#78978c" infiniteGrid={false}/>
-       {scene.rooms.map(room=>{const p=center(room);const m=values.find(v=>v.id===room.id)!;const density=m.occupancy/Math.max(1,room.width*room.depth);const color=heat?(density>.7?'#b56d53':density>.25?'#95774b':'#447f72'):room.id===selected?'#5c9e91':'#42645f';return <group key={room.id}>
+       {showPheiGeometry&&scene.rooms.map(room=>{const p=center(room);const m=values.find(v=>v.id===room.id)!;const density=m.occupancy/Math.max(1,room.width*room.depth);const color=heat?(density>.7?'#b56d53':density>.25?'#95774b':'#447f72'):room.id===selected?'#5c9e91':'#42645f';return <group key={room.id}>
         <mesh position={[p[0],-.025,p[1]]} receiveShadow onClick={e=>{e.stopPropagation();chooseRoom(room.id)}}><boxGeometry args={[room.width,.06,room.depth]}/><meshStandardMaterial color={color} roughness={.9}/></mesh>
         <Html position={[p[0],WALL_HEIGHT+.3,p[1]]} center style={{pointerEvents:'none',whiteSpace:'nowrap'}}><span className="phei-gl-label">{room.name}</span></Html>
        </group>})}
-       {walls&&view!=='plan'&&segments.map((s,i)=><Shape key={i} {...s}/>)}
-       {scene.furniture.map((f,i)=><Shape key={i} position={[f.x+f.width/2,.375,f.z+f.depth/2]} size={[f.width,.75,f.depth]} color="#bba889"/>)}
+       {showPheiGeometry&&walls&&view!=='plan'&&segments.map((s,i)=><Shape key={i} {...s}/>)}
+       {showPheiGeometry&&scene.furniture.map((f,i)=><Shape key={i} position={[f.x+f.width/2,.375,f.z+f.depth/2]} size={[f.width,.75,f.depth]} color="#bba889"/>)}
+       {showBlender&&blender&&<primitive object={blender.object}/>}
        {showAgents&&live.map(a=><AgentFigure key={a.id} agent={a} time={sim.time}/>)}
        <mesh position={[19,PERSON_HEIGHT/2,4]}><boxGeometry args={[.10,PERSON_HEIGHT,.10]}/><meshStandardMaterial color="#ebd4a5"/></mesh>
        <Html position={[19,2.45,4]} center style={{pointerEvents:'none'}}><span className="phei-gl-label">Referencia 1,75 m</span></Html>
-       <OrbitControls target={[9,0,1]} minDistance={5} maxDistance={72} enablePan={view!=='plan'} enableRotate={view!=='plan'} maxPolarAngle={Math.PI/2.05}/>
+       <OrbitControls target={showBlender&&blender?blender.center:[9,0,1]} minDistance={5} maxDistance={72} enablePan={view!=='plan'} enableRotate={view!=='plan'} maxPolarAngle={Math.PI/2.05}/>
       </Canvas></WebGLBoundary>
-      <span className="phei-gl-scenenote">GEOMETRÍA HIPOTÉTICA · SIN BIM</span>
+      <span className="phei-gl-scenenote">{blender&&showBlender?'BLENDER: CAPA VISUAL · SIMULACIÓN NO VINCULADA':'GEOMETRÍA HIPOTÉTICA · SIN BIM'}</span>
      </div>
      <div className="phei-gl-controls" aria-label="Control de la simulación">
       <button type="button" className="phei-gl-primary" onClick={()=>setRunning(v=>!v)}>{running?'Pausar':'Iniciar'}</button>
@@ -176,7 +219,19 @@ function WebGLApp(){
      <h2>{selectedRoom.name}</h2>
      <p>{selectedRoom.width.toFixed(2)} × {selectedRoom.depth.toFixed(2)} m · área bruta {(selectedRoom.width*selectedRoom.depth).toFixed(1)} m²</p>
      <div className="phei-gl-inspector-kpis"><div><small>Ocupación</small><strong>{selectedMetrics.occupancy} / {selectedRoom.capacity}</strong></div><div><small>Densidad</small><strong>{selectedMetrics.density.toFixed(2)}</strong><span>personas/m²</span></div><div><small>Pico</small><strong>{selectedMetrics.peak}</strong></div><div><small>Cola</small><strong>{selectedMetrics.queue}</strong></div></div>
+     <h3>Modelo 3D de Blender · visual</h3>
+     <label className="phei-gl-import-label" htmlFor="blender-file">Importar GLB o glTF local (máx. 20 MB)</label>
+     <input id="blender-file" data-testid="blender-file" aria-label="Importar modelo Blender GLB o glTF" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" disabled={loadingModel}
+      onChange={e=>{const file=e.currentTarget.files?.[0];e.currentTarget.value='';void importBlender(file);}}/>
+     {loadingModel&&<p role="status" className="phei-gl-message">Leyendo geometría y materiales…</p>}
+     {blender&&<div className="phei-gl-import-status" data-testid="blender-imported">
+      <strong>Modelo importado: {blender.name}</strong>
+      <span>Extensiones: {blender.width.toFixed(2)} × {blender.depth.toFixed(2)} × {blender.height.toFixed(2)} m (sin calibrar)</span>
+      <button type="button" onClick={removeBlender}>Retirar modelo</button>
+     </div>}
      <h3>Capas de visualización</h3>
+     {blender&&<label className="phei-gl-check"><span>Mostrar modelo Blender</span><input type="checkbox" checked={showBlender} onChange={e=>setShowBlender(e.target.checked)}/></label>}
+     <label className="phei-gl-check"><span>Mostrar geometría esquemática PHEI</span><input type="checkbox" checked={showPheiGeometry} onChange={e=>setShowPheiGeometry(e.target.checked)}/></label>
      <label className="phei-gl-check"><span>Muros / cerramientos</span><input type="checkbox" checked={walls} onChange={e=>setWalls(e.target.checked)}/></label>
      <label className="phei-gl-check"><span>Ocupación por ambiente</span><input type="checkbox" checked={heat} onChange={e=>setHeat(e.target.checked)}/></label>
      <label className="phei-gl-check"><span>Personas sintéticas</span><input type="checkbox" checked={showAgents} onChange={e=>setShowAgents(e.target.checked)}/></label>
@@ -184,10 +239,10 @@ function WebGLApp(){
      <label className="phei-gl-poplabel">Personas<input aria-label="Número de personas" type="number" min={1} max={200} value={population} onChange={e=>setPopulation(e.target.value)}/></label>
      <button className="phei-gl-apply" type="button" onClick={applyPopulation}>Aplicar y reiniciar</button>
      {message&&<p role="status" className="phei-gl-message">{message}</p>}
-     <p className="phei-gl-warning">Este escenario no permite predecir el estrés, la ansiedad, el llanto ni calcular evacuaciones o aforos reglamentarios.</p>
+     <p className="phei-gl-warning">Importar un modelo no modifica recorridos, puertas, colisiones, aforo ni datos de evaluación. Alinea manualmente unidades/origen; no subas datos identificables. Este escenario no permite predecir el estrés, la ansiedad, el llanto ni calcular evacuaciones o aforos reglamentarios.</p>
     </aside>
    </div>
-   <div className="phei-gl-limits"><strong>Qué representa y qué no representa</strong><span>Todos los recorridos utilizan el mismo motor determinista del Digital Twin. El WebGL es una vista complementaria de la geometría hipotética; la evidencia, calibración e historial continúan en la aplicación principal. No se han calibrado colisiones, perfiles humanos, iluminación, seguridad ni rendimiento en un dispositivo físico.</span></div>
+   <div className="phei-gl-limits"><strong>Qué representa y qué no representa</strong><span>La capa GLB/glTF es solo visual y se procesa localmente; las métricas no utilizan la geometría importada. Todos los recorridos utilizan el mismo motor determinista del Digital Twin. El WebGL es una vista complementaria de la geometría hipotética; la evidencia, calibración e historial continúan en la aplicación principal. No se han calibrado colisiones, perfiles humanos, iluminación, seguridad ni rendimiento en un dispositivo físico.</span></div>
   </main>
  </div>;
 }
