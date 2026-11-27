@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PHEI Vision 0.1 | PRESER</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1618;--panel:#142225;--edge:#304344;--fg:#ecf1e8;--muted:#a1b6b0;--accent:#c5dcb0}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px system-ui,sans-serif}header,main{max-width:1500px;margin:auto;padding:22px}header{border-bottom:1px solid var(--edge)}h1{margin:7px 0;font-size:32px}h2{font-size:17px;margin-top:0}p{line-height:1.55;color:var(--muted)}a{color:var(--accent)}small{color:var(--muted)}.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:18px;margin-bottom:14px}label{display:block;margin:12px 0 5px}input,select,button{font:inherit;color:inherit}input:not([type=checkbox]),select{width:100%;background:#0c1618;border:1px solid #50615c;border-radius:7px;padding:8px}button{background:var(--accent);color:#173329;border:0;border-radius:8px;padding:10px 12px;font-weight:bold;cursor:pointer;margin:4px 2px}button.secondary{background:#293e36;color:var(--fg)}button:disabled{opacity:.4;cursor:not-allowed}.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.toolbar label{margin:0}.toolbar select{width:auto}canvas{display:block;width:100%;height:auto;background:#071012;touch-action:none;max-width:100%}.notice{background:#27392e;padding:10px;border-radius:8px;color:#d9ebc9}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.metric{border:1px solid var(--edge);padding:12px;border-radius:8px}.metric b{font-size:23px;display:block}table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;padding:9px;border-bottom:1px solid var(--edge)}.scroll{overflow:auto}.legend{height:8px;background:linear-gradient(90deg,#184ae5,#00d6d0,#7bd12a,#ffe225,#ed341c);border-radius:4px;margin:10px 0}@media(max-width:760px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}header,main{padding:12px}}
+</style></head><body><header><small>PRESER / PHEI RESEARCH LAB / PROTOTIPO 0.1</small><h1>PHEI Vision</h1><p>Procesamiento exploratorio de fijaciones visuales sobre imágenes arquitectónicas estáticas.</p><a href="./index.html">Volver a PHEI Studio</a></header>
+<main><div class="layout"><aside>
+<div class="panel"><h2>Datos de estudio</h2><label>Imagen de estímulo (PNG/JPEG/WebP)</label><input type="file" id="image" accept="image/png,image/jpeg,image/webp"><label>CSV de fijaciones (un participante, un estímulo)</label><input type="file" id="csv" accept=".csv,text/csv"><label>Unidad de coordenadas</label><select id="units"><option value="norm">Normalizadas 0–1</option><option value="px">Píxeles de imagen original</option></select><button id="load">Cargar archivos</button><button class="secondary" id="demo">Demostración sintética</button><button class="secondary" id="template">CSV de ejemplo</button><p>Columnas exactas: <code>t_ms,x,y,duration_ms</code>. Tiempo en milisegundos desde el inicio del estímulo. Coordenadas con origen superior izquierdo. Solo fijaciones ya detectadas, no muestras crudas.</p><div id="message" role="status" class="notice">Sin datos cargados.</div></div>
+<div class="panel"><h2>Parámetros</h2><label for="radius">Radio de suavizado (fracción del ancho): <span id="radiusText">0.04</span></label><input id="radius" type="range" min=".01" max=".12" step=".01" value=".04"><label for="aoiName">Nombre de área de interés</label><input id="aoiName" maxlength="50" placeholder="Ventana, vegetación..."><button id="draw" class="secondary">Dibujar AOI rectangular</button><button id="clear" class="secondary">Limpiar AOI</button><p>Selecciona dos esquinas en la imagen. Las áreas pueden superponerse.</p></div>
+</aside><section><div class="panel"><div class="toolbar"><label for="mode">Vista</label><select id="mode"><option value="both">Mapa + ruta</option><option value="heat">Mapa de calor</option><option value="route">Ruta visual</option><option value="image">Solo imagen y AOI</option></select><button id="png" class="secondary">Exportar PNG</button><button id="report" class="secondary">Exportar métricas CSV</button></div><div class="metrics"><div class="metric"><small>Fijaciones</small><b id="n">—</b></div><div class="metric"><small>Duración total</small><b id="total">—</b></div><div class="metric"><small>Duración media</small><b id="mean">—</b></div></div><canvas id="canvas" width="960" height="540" aria-label="Mapa de fijaciones y ruta visual"></canvas><div class="legend"></div><small>Densidad relativa ponderada por duración, normalizada al máximo de este registro (no comparable directamente entre sujetos). No representa estrés, preferencia ni carga cognitiva.</small></div>
+<div class="panel"><h2>Áreas de interés</h2><div class="scroll"><table><thead><tr><th>AOI</th><th>N.º fij.</th><th>Total ms</th><th>% duración</th><th>Latencia ms</th></tr></thead><tbody id="rows"></tbody></table></div><p>Asignación por centro de fijación. Latencia desde inicio del estímulo. Los porcentajes pueden sumar más de 100 % cuando las áreas se superponen.</p></div><div class="panel"><h2>Alcance y privacidad</h2><p>Los archivos se procesan en memoria local del navegador y no se envían a un servidor. Los datos de demostración son ficticios. No se detectan fijaciones, sacadas o parpadeos a partir de muestras crudas; no se admite video ni EEG todavía. Validar las coordenadas, el origen temporal, la calibración y la detección de fijaciones con el dispositivo original antes de investigar. No subir datos identificables al repositorio público.</p></div></section></div></main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function parseFixations(raw,units,w,h){
+ const lines=raw.replace(/^\uFEFF/,'').trim().split(/\r?\n/);
+ if(lines.shift()?.trim()!=='t_ms,x,y,duration_ms')throw Error('Cabecera requerida: t_ms,x,y,duration_ms');
+ if(!lines.length||lines.length>20000)throw Error('Se requieren entre 1 y 20 000 fijaciones.');
+ const points=lines.map((line,i)=>{
+ const a=line.split(',').map(s=>s.trim());
+ if(a.length!==4||a.some(s=>s===''))throw Error('Fila '+(i+2)+': cuatro valores obligatorios.');
+ let [t,x,y,d]=a.map(Number);
+ if(![t,x,y,d].every(Number.isFinite)||t<0||d<=0)throw Error('Fila '+(i+2)+': valores inválidos.');
+ if(units==='px'){x/=w;y/=h}
+ if(x<0||x>1||y<0||y>1)throw Error('Fila '+(i+2)+': coordenadas fuera de rango.');
+ return {t,x,y,d};
+ }).sort((a,b)=>a.t-b.t);
+ for(let i=1;i<points.length;i++)if(points[i].t<points[i-1].t+points[i-1].d)throw Error('Fijaciones superpuestas en el tiempo; verifica que sea una sola grabación.');
+ return points;
+}
+function aoiStats(points,area){
+ const subset=points.filter(p=>p.x>=area.x1&&p.x<=area.x2&&p.y>=area.y1&&p.y<=area.y2);
+ const total=points.reduce((s,p)=>s+p.d,0),sum=subset.reduce((s,p)=>s+p.d,0);
+ return {name:area.name,n:subset.length,sum,pct:total?100*sum/total:0,latency:subset.length?Math.min(...subset.map(p=>p.t)):null};
+}
+function heatGrid(points,w,h,radius){
+ const a=new Float32Array(w*h),sigma=Math.max(1,radius*w),range=Math.ceil(sigma*3);
+ for(const p of points){const cx=p.x*(w-1),cy=p.y*(h-1);
+ for(let y=Math.max(0,Math.floor(cy-range));y<=Math.min(h-1,Math.ceil(cy+range));y++)
+ for(let x=Math.max(0,Math.floor(cx-range));x<=Math.min(w-1,Math.ceil(cx+range));x++){
+ const d2=(x-cx)**2+(y-cy)**2;a[y*w+x]+=p.d*Math.exp(-d2/(2*sigma*sigma));
+ }}
+ let max=0;for(const v of a)if(v>max)max=v;return {a,max};
+}
+const canvas=$('canvas'),ctx=canvas.getContext('2d');let points=[],areas=[],stimulus=null,source='Sin datos',draft=null,drawing=false;
+const demoCSV='t_ms,x,y,duration_ms\n100,0.25,0.35,220\n400,0.32,0.38,300\n800,0.65,0.35,450\n1400,0.69,0.40,600\n2100,0.51,0.75,180\n2400,0.66,0.36,310';
+const palette=[[24,74,229],[0,214,208],[123,209,42],[255,226,37],[237,52,28]];
+let heatCache=null;
+function clearHeat(){heatCache=null}
+function render(){
+ const w=canvas.width,h=canvas.height;
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#071012';ctx.fillRect(0,0,w,h);
+ if(stimulus)ctx.drawImage(stimulus,0,0,w,h);
+ if(!stimulus){ctx.fillStyle='#a1b6b0';ctx.font='18px system-ui';ctx.fillText('Cargue un estímulo y sus fijaciones',25,40)}
+ let mode=$('mode').value;
+ if(points.length&&(mode==='both'||mode==='heat')){
+ if(!heatCache){
+ const gw=200,gh=Math.max(1,Math.round(200*h/w)),v=heatGrid(points,gw,gh,Number($('radius').value));
+ const c=document.createElement('canvas');c.width=gw;c.height=gh;const cc=c.getContext('2d'),img=cc.createImageData(gw,gh);
+ for(let i=0;i<v.a.length;i++){const p=v.max?v.a[i]/v.max:0,z=p*4,k=Math.min(3,Math.floor(z)),f=z-k;
+ for(let j=0;j<3;j++)img.data[i*4+j]=Math.round(palette[k][j]*(1-f)+palette[k+1][j]*f);
+ img.data[i*4+3]=p<.025?0:Math.round(205*Math.sqrt(p));}
+ cc.putImageData(img,0,0);heatCache=c;
+ }
+ ctx.drawImage(heatCache,0,0,w,h);
+ }
+ if(points.length&&(mode==='both'||mode==='route')){
+ ctx.strokeStyle='#f9e7b8';ctx.lineWidth=2;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x*w,p.y*h):ctx.moveTo(p.x*w,p.y*h));ctx.stroke();
+ points.forEach((p,i)=>{const x=p.x*w,y=p.y*h,r=Math.min(18,4+Math.sqrt(p.d)/3);ctx.fillStyle='#101e20cc';ctx.strokeStyle='#fff0c8';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.stroke();if(points.length<=300){ctx.fillStyle='#fff';ctx.font='10px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),x,y)}});
+ ctx.textAlign='start';ctx.textBaseline='alphabetic';
+ }
+ for(const a of areas){ctx.strokeStyle='#baffad';ctx.lineWidth=2;ctx.strokeRect(a.x1*w,a.y1*h,(a.x2-a.x1)*w,(a.y2-a.y1)*h);ctx.font='14px system-ui';ctx.fillStyle='#baffad';ctx.fillText(a.name,a.x1*w+4,Math.max(16,a.y1*h-5))}
+ if(draft){ctx.fillStyle='#fff';ctx.fillRect(draft.x*w-3,draft.y*h-3,6,6)}
+ if(stimulus){ctx.fillStyle='#071012dc';ctx.fillRect(0,h-27,w,27);ctx.fillStyle='#fff';ctx.font='12px system-ui';ctx.fillText(source+' | '+mode+' | radio '+$('radius').value+' | n='+points.length,8,h-9)}
+ const total=points.reduce((s,p)=>s+p.d,0);$('n').textContent=points.length||'—';$('total').textContent=points.length?total.toFixed(0)+' ms':'—';$('mean').textContent=points.length?(total/points.length).toFixed(1)+' ms':'—';
+ $('rows').replaceChildren();for(const a of areas){const s=aoiStats(points,a),tr=document.createElement('tr');for(const val of [s.name,s.n,s.sum.toFixed(1),s.pct.toFixed(1)+'%',s.latency??'Sin fijación']){const td=document.createElement('td');td.textContent=val;tr.append(td)}$('rows').append(tr)}
+ for(const id of ['draw','clear','png','report'])$(id).disabled=!stimulus;
+}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function setStudy(img,p,kind){stimulus=img;points=p;source=kind;areas=[];draft=null;drawing=false;canvas.style.cursor='default';const scale=Math.min(1,1200/img.width,1000/img.height);canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));clearHeat();$('message').textContent=kind+': '+p.length+' fijaciones cargadas.';render()}
+$('load').onclick=async()=>{try{
+ const f=$('image').files[0],g=$('csv').files[0];if(!f||!g)throw Error('Selecciona ambos archivos.');
+ if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>20e6||g.size>5e6)throw Error('Tipo de imagen o tamaño no admitido.');
+ const bmp=await createImageBitmap(f);try{const p=parseFixations(await g.text(),$('units').value,bmp.width,bmp.height);if(stimulus?.close)stimulus.close();setStudy(bmp,p,'DATOS IMPORTADOS — no validados')}catch(e){bmp.close();throw e}
+ }catch(e){$('message').textContent=e.message+' (el estudio anterior no cambia).'}};
+$('demo').onclick=()=>{const c=document.createElement('canvas');c.width=960;c.height=540;const a=c.getContext('2d');a.fillStyle='#c6c1ac';a.fillRect(0,0,960,540);a.fillStyle='#e8e6d9';a.fillRect(120,60,720,315);a.fillStyle='#87aeb8';a.fillRect(150,80,320,220);a.strokeStyle='#f4f2e4';a.lineWidth=10;a.strokeRect(150,80,320,220);a.beginPath();a.moveTo(310,80);a.lineTo(310,300);a.stroke();a.fillStyle='#a39375';a.fillRect(0,375,960,165);a.fillStyle='#695440';a.fillRect(590,300,100,75);a.fillStyle='#45734d';for(let i=0;i<8;i++){a.beginPath();a.ellipse(625+Math.sin(i*2)*50,210+i*10,33,55,i*.5,0,Math.PI*2);a.fill()}a.fillStyle='#665b4c';a.fillRect(250,405,460,65);a.fillStyle='#222';a.font='20px system-ui';a.fillText('Aula esquemática — estímulo ficticio',20,35);if(stimulus?.close)stimulus.close();setStudy(c,parseFixations(demoCSV,'norm',960,540),'DEMOSTRACIÓN SINTÉTICA');areas=[{name:'Ventana',x1:.15,y1:.14,x2:.50,y2:.56},{name:'Vegetación',x1:.59,y1:.30,x2:.73,y2:.70}];render()};
+$('template').onclick=()=>download(new Blob([demoCSV],{type:'text/csv'}),'PHEI_ejemplo_sintetico.csv');
+$('mode').onchange=render;$('radius').oninput=()=>{$('radiusText').textContent=$('radius').value;clearHeat();render()};
+$('draw').onclick=()=>{drawing=true;draft=null;canvas.style.cursor='crosshair';$('message').textContent='Selecciona dos esquinas de la AOI.'};
+canvas.addEventListener('pointerdown',e=>{if(!drawing)return;const r=canvas.getBoundingClientRect(),x=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));if(!draft){draft={x,y};render();return}
+ if(Math.abs(x-draft.x)<.005||Math.abs(y-draft.y)<.005){$('message').textContent='Área demasiado pequeña, vuelve a seleccionar.';draft=null;render();return}
+ areas.push({name:$('aoiName').value.trim()||'AOI '+(areas.length+1),x1:Math.min(x,draft.x),y1:Math.min(y,draft.y),x2:Math.max(x,draft.x),y2:Math.max(y,draft.y)});draft=null;drawing=false;canvas.style.cursor='default';$('message').textContent='AOI añadida. '+source;render()});
+$('clear').onclick=()=>{areas=[];draft=null;drawing=false;canvas.style.cursor='default';render()};
+$('png').onclick=()=>canvas.toBlob(b=>{if(b)download(b,'PHEI_Vision.png')},'image/png');
+function csvSafe(v){let s=String(v??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
+$('report').onclick=()=>{const rows=[['fuente','radio_sigma_ancho','aoi','x1','y1','x2','y2','n_fijaciones','duracion_ms','porcentaje_duracion','latencia_ms']];const sum=points.reduce((s,p)=>s+p.d,0);rows.push([source,$('radius').value,'GLOBAL',0,0,1,1,points.length,sum,100,points[0]?.t]);for(const a of areas){const s=aoiStats(points,a);rows.push([source,$('radius').value,s.name,a.x1,a.y1,a.x2,a.y2,s.n,s.sum,s.pct.toFixed(4),s.latency])}download(new Blob([rows.map(row=>row.map(csvSafe).join(',')).join('\n')],{type:'text/csv'}),'PHEI_Vision_metricas.csv')};
+render();
+</script></body></html>
